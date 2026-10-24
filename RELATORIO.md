@@ -35,7 +35,7 @@ Atualizado em 24/10/2026.
 - A rodada começa com 1 nota grátis. Só o time que começa compra notas extras (1 crédito cada, até 10 notas), e só antes de responder.
 - Ordem das respostas: time que começou, outro time (sem gastar créditos), plateia do time que começou, plateia do outro time, e assim por diante até alguém acertar.
 - O apresentador digita cada resposta; o jogo confere por comparação de texto (`norm`, `lev`, `matches`; tolera acento, caixa e ~1 erro a cada 6 letras, com variantes no campo `a`). O apresentador não vê a resposta certa.
-- As respostas erradas ficam listadas na tela pública. Acertou: o time (ou o time da plateia) ganha 1 ponto, o título é revelado e toca um trecho de 10 segundos do YouTube (campos `v` e `st` em `SONGS`).
+- As respostas erradas ficam listadas na tela pública. Acertou: o time (ou o time da plateia) ganha 1 ponto, o título é revelado e toca um trecho de 10 segundos do YouTube em tela cheia, que fica aberto até o apresentador fechar (campos `v` e `st` em `SONGS`).
 - "Encerrar sem ponto" revela a resposta sem pontuar.
 
 ## Dicas em uso
