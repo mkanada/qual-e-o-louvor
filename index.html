@@ -59,6 +59,8 @@ label.f input{margin-top:4px;color:var(--ink)}
 button.ok{background:var(--ok);color:#fff;border-color:var(--ok);font-weight:600}
 button.no{background:var(--bad);color:#fff;border-color:var(--bad);font-weight:600}
 [hidden]{display:none!important}
+.tries{list-style:none;margin:10px 0 0;padding:0;color:var(--bad);font-weight:600}
+.tries li::before{content:"✘ "}
 footer{color:var(--muted);font-size:.85rem;margin-top:24px;text-align:center}
 </style>
 </head>
@@ -99,16 +101,13 @@ footer{color:var(--muted);font-size:.85rem;margin-top:24px;text-align:center}
     </section>
 
     <section class="card" id="judge">
-      <h2 id="judgeTitle">Apresentador</h2>
-      <div class="row" id="judgeTeam">
-        <button class="ok" id="btnHit">✔ Acertou</button>
-        <button class="no" id="btnMiss">✘ Errou</button>
-      </div>
-      <div class="row" id="judgeCrowd" hidden>
-        <button class="ok" id="btnCrowd0"></button>
-        <button class="ok" id="btnCrowd1"></button>
-        <button id="btnNobody">Ninguém acertou</button>
-      </div>
+      <h2 id="judgeTitle"></h2>
+      <form class="row" id="form" autocomplete="off">
+        <input id="answer" type="text" placeholder="Digite a resposta" aria-label="Resposta" style="flex:3 1 200px">
+        <button class="primary" type="submit" style="flex:1 1 90px">Responder</button>
+      </form>
+      <ul class="tries" id="tries"></ul>
+      <button id="btnGive" style="margin-top:12px">Encerrar sem ponto</button>
     </section>
 
     <section class="card" id="result" hidden>
@@ -129,17 +128,17 @@ const SONGS = [
    h:"Nem à frente, nem atrás, duas vezes"},
   {t:"Santo santo santo", f:"santo-santo-santo", s:"", v:"FDpludwY46U", st:11, n:1,
    h:"Uma só palavra, dita três vezes"},
-  {t:"Vencendo vem Jesus", f:"vencendo-vem", s:"", v:"U4ym16En8xc", st:39, n:441,
+  {t:"Vencendo vem Jesus", f:"vencendo-vem", s:"", v:"U4ym16En8xc", st:39, n:441, a:["Vencendo vem"],
    h:"Ele não chega perdendo, nem empatando"},
   {t:"Canção da vida", f:"cancao-vida", s:"", v:"EyOkqnp-boI", st:37, n:375,
    h:"Não é uma canção qualquer. É a que acompanha a existência inteira, do primeiro ao último fôlego."},
   {t:"Sou de Jesus", f:"sou-de-jesus", s:"", v:"lNnC4Lj998s", st:69, n:162,
    h:"Em 1 Coríntios 6, Paulo lembra que não somos de nós mesmos, fomos comprados por preço."},
-  {t:"A esperança é Jesus", f:"esperanca", s:"", v:"8hKR6ohrexE", st:91, n:33,
+  {t:"A esperança é Jesus", f:"esperanca", s:"", v:"8hKR6ohrexE", st:91, n:33, a:["Esperança é Jesus"],
    h:"Dizem que é a última que morre, mas aqui ela tem nome."},
   {t:"Meu farol", f:"meu-farol", s:"", v:"kO1XALdcp_4", st:58,
    h:"Na tempestade, é importante para o marinheiro"},
-  {t:"Vitória em nome de Jesus", f:"vitoria", s:"", v:"J-YH-Nojg6E", st:95,
+  {t:"Vitória em nome de Jesus", f:"vitoria", s:"", v:"J-YH-Nojg6E", st:95, a:["Vitória em nome"],
    h:"O contrário de derrota, conquistada não pela própria força, mas invocando um Nome."},
   {t:"Rumo ao lar", f:"rumo-ao-lar", s:"", v:"Qrv5FNt_AKo", st:50,
    h:"O que a bússola indica, alguns chamam de doce"},
@@ -149,12 +148,40 @@ const SONGS = [
 const MAX = 10, CLIP = 10;
 const $ = id => document.getElementById(id);
 
-let order, idx, song, notes, done, turn, phase; // phase: "team" (vez de um time) | "crowd"
-let names, credits, score, first, audio = null;
+let order, idx, song, notes, done, first, tries, score, credits, names, audio = null;
 
 function shuffle(a){ a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
 const file = (s,n) => `${s.f}-${String(n).padStart(2,"0")}${s.s}.mp3`;
 const esc = x => x.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+const norm = x => x.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase()
+  .replace(/[^a-z0-9 ]+/g," ").replace(/\s+/g," ").trim();
+
+function lev(a, b){
+  const d = Array.from({length:a.length+1},(_,i)=>[i]);
+  for (let j=1;j<=b.length;j++) d[0][j]=j;
+  for (let i=1;i<=a.length;i++) for (let j=1;j<=b.length;j++)
+    d[i][j] = Math.min(d[i-1][j]+1, d[i][j-1]+1, d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
+  return d[a.length][b.length];
+}
+
+// aceita se a distância de edição for pequena (≈ 1 erro a cada 6 letras)
+function matches(input, s){
+  const x = norm(input);
+  if (!x) return false;
+  return [s.t, ...(s.a||[])].some(c => {
+    const y = norm(c);
+    return lev(x, y) <= Math.floor(y.length / 6);
+  });
+}
+
+// Quem responde na tentativa k: 0 = time que começou, 1 = o outro time,
+// depois a plateia do que começou, a plateia do outro, e assim por diante.
+function actor(k){
+  if (k < 2) return {team:(first + k) % 2, crowd:false};
+  return {team:(first + k) % 2, crowd:true};
+}
+const who = a => a.crowd ? `plateia de ${names[a.team]}` : names[a.team];
 
 function newGame(){
   names = [$("name1").value.trim() || "Time 1", $("name2").value.trim() || "Time 2"];
@@ -166,42 +193,39 @@ function newGame(){
   startRound();
 }
 
-function renderTeams(){
-  [0,1].forEach(i => {
-    const el = $("team"+i);
-    el.className = "team" + (!done && phase === "team" && turn === i ? " turn" : "");
-    el.innerHTML = `<div class="n">${esc(names[i])}</div><div class="p">${score[i]}</div><div class="c">${credits[i]} crédito${credits[i]===1?"":"s"}</div>`;
-  });
-}
-
 function startRound(){
   stop();
   song = SONGS[order[idx]];
-  notes = 1; done = false; phase = "team";
-  first = idx % 2; turn = first;            // alterna quem começa
+  notes = 1; done = false; tries = [];
+  first = idx % 2;                          // alterna quem começa
   $("round").textContent = idx+1;
   $("hint").textContent = song.h;
   $("result").hidden = true; $("ytBox").innerHTML = "";
+  $("answer").value = "";
   render();
+  $("answer").focus();
 }
 
 function render(){
-  renderTeams();
+  const k = tries.length, a = actor(k);
+  [0,1].forEach(i => {
+    const el = $("team"+i);
+    el.className = "team" + (!done && a.team === i ? " turn" : "");
+    el.innerHTML = `<div class="n">${esc(names[i])}</div><div class="p">${score[i]}</div><div class="c">${credits[i]} crédito${credits[i]===1?"":"s"}</div>`;
+  });
   $("dots").innerHTML = Array.from({length:MAX},(_,i)=>`<div class="dot ${i<notes?"on":""}"></div>`).join("");
   $("btnPlay").textContent = `▶ Tocar ${notes} ${notes === 1 ? "nota" : "notas"}`;
-  const team = phase === "team" && !done;
-  const left = team ? credits[turn] : 0;
-  $("btnMore").disabled = !team || notes >= MAX || left < 1;
-  $("btnMore").textContent = team
-    ? (left < 1 ? "Sem créditos: só a dica" : `+ Mais uma nota (−1 crédito, restam ${left})`)
-    : "+ Mais uma nota";
+  // só o time que começa compra notas, e só antes de responder
+  const canBuy = !done && k === 0;
+  const left = credits[first];
+  $("btnMore").disabled = !canBuy || notes >= MAX || left < 1;
+  $("btnMore").textContent = !canBuy ? "+ Mais uma nota"
+    : left < 1 ? "Sem créditos: só a dica"
+    : `+ Mais uma nota (−1 crédito, restam ${left})`;
+  $("turnMsg").textContent = done ? "" : `Vez de: ${who(a)}`;
   $("judge").hidden = done;
-  $("judgeTeam").hidden = phase !== "team";
-  $("judgeCrowd").hidden = phase !== "crowd";
-  $("turnMsg").textContent = done ? "" : phase === "team" ? `Vez de: ${names[turn]}` : "Vez da plateia";
-  $("judgeTitle").textContent = phase === "team" ? "Apresentador: o time acertou?" : "Apresentador: a plateia vai falando. Quando acertar, quem ganha o ponto?";
-  $("btnCrowd0").textContent = `Ponto: ${names[0]}`;
-  $("btnCrowd1").textContent = `Ponto: ${names[1]}`;
+  $("judgeTitle").textContent = `Digite a resposta de: ${who(a)}`;
+  $("tries").innerHTML = tries.map(t => `<li>${esc(t.text)} <small>(${esc(t.by)})</small></li>`).join("");
 }
 
 function finish(winner){
@@ -209,14 +233,14 @@ function finish(winner){
   if (winner !== null) score[winner]++;
   const last = idx === SONGS.length-1;
   $("resMsg").className = "msg " + (winner !== null ? "ok" : "bad");
-  $("resMsg").textContent = (winner !== null ? `✅ ${names[winner]} ganha o ponto! ` : "Ninguém acertou. ")
+  $("resMsg").textContent = (winner !== null ? `✅ ${names[winner]} ganha o ponto! ` : "Ninguém ganhou o ponto. ")
     + `Era "${song.t}"` + (song.n ? ` (hino ${song.n})` : "") + ".";
   const src = `https://www.youtube-nocookie.com/embed/${song.v}?start=${song.st}&end=${song.st+CLIP}&autoplay=1&rel=0&playsinline=1`;
   $("ytBox").innerHTML = `<iframe src="${src}" title="${esc(song.t)}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
   $("ytLink").href = `https://youtu.be/${song.v}?t=${song.st}`;
   if (last) {
-    const [a,b] = score;
-    $("btnNext").textContent = `Fim! ${a===b ? "Empate" : "Vitória: " + names[a>b?0:1]} (${a} × ${b}) — novo jogo`;
+    const [x,y] = score;
+    $("btnNext").textContent = `Fim! ${x===y ? "Empate" : "Vitória: " + names[x>y?0:1]} (${x} × ${y}) — novo jogo`;
   } else $("btnNext").textContent = "Próxima música →";
   $("result").hidden = false;
   render();
@@ -224,15 +248,20 @@ function finish(winner){
 }
 
 $("btnStart").onclick = newGame;
-$("btnHit").onclick = () => { if (!done && phase === "team") finish(turn); };
-$("btnMiss").onclick = () => {
-  if (done || phase !== "team") return;
-  if (turn === first) turn = 1 - first; else phase = "crowd";
+
+$("form").onsubmit = e => {
+  e.preventDefault();
+  const text = $("answer").value.trim();
+  if (done || !text) return;
+  const a = actor(tries.length);
+  if (matches(text, song)) { finish(a.team); return; }
+  tries.push({text, by: who(a)});
+  $("answer").value = "";
   render();
+  $("answer").focus();
 };
-$("btnCrowd0").onclick = () => { if (!done && phase === "crowd") finish(0); };
-$("btnCrowd1").onclick = () => { if (!done && phase === "crowd") finish(1); };
-$("btnNobody").onclick = () => { if (!done && phase === "crowd") finish(null); };
+
+$("btnGive").onclick = () => { if (!done) finish(null); };
 
 function stop(){ if (audio) { audio.pause(); audio = null; } }
 function play(){
@@ -243,8 +272,8 @@ function play(){
 
 $("btnPlay").onclick = play;
 $("btnMore").onclick = () => {
-  if (done || phase !== "team" || notes >= MAX || credits[turn] < 1) return;
-  credits[turn]--; notes++; render(); play();
+  if (done || tries.length > 0 || notes >= MAX || credits[first] < 1) return;
+  credits[first]--; notes++; render(); play();
 };
 $("btnNext").onclick = () => {
   if (idx === SONGS.length-1) {

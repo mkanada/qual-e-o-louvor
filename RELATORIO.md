@@ -31,12 +31,12 @@ Atualizado em 24/10/2026.
 ## Como o jogo funciona (versão de dois times)
 
 - Tela inicial: nomes dos times e créditos de notas por time (padrão 5, vale para a partida toda).
-- 10 rodadas, músicas em ordem aleatória. A dica fica visível desde o início; a primeira nota é grátis.
-- Cada rodada começa por um time (alterna a cada rodada). O time gasta 1 crédito para liberar a nota seguinte (as notas liberadas ficam para todos). Sem créditos, só a dica.
-- O apresentador marca "Acertou" ou "Errou". Errou: passa para o outro time; se este também errar, vai para a plateia.
-- Na plateia, o apresentador escolhe quem ganha o ponto (time 1, time 2) ou "Ninguém acertou".
-- Ao fim da rodada, o título é revelado e toca um trecho de 10 segundos do YouTube (início definido por música em `SONGS`, campos `v` e `st`). Cada acerto vale 1 ponto.
-- Não há mais digitação nem comparação de texto: o julgamento é do apresentador.
+- 10 rodadas, músicas em ordem aleatória. Um time começa cada rodada, alternando. A dica fica aberta para todos.
+- A rodada começa com 1 nota grátis. Só o time que começa compra notas extras (1 crédito cada, até 10 notas), e só antes de responder.
+- Ordem das respostas: time que começou, outro time (sem gastar créditos), plateia do time que começou, plateia do outro time, e assim por diante até alguém acertar.
+- O apresentador digita cada resposta; o jogo confere por comparação de texto (`norm`, `lev`, `matches`; tolera acento, caixa e ~1 erro a cada 6 letras, com variantes no campo `a`). O apresentador não vê a resposta certa.
+- As respostas erradas ficam listadas na tela pública. Acertou: o time (ou o time da plateia) ganha 1 ponto, o título é revelado e toca um trecho de 10 segundos do YouTube (campos `v` e `st` em `SONGS`).
+- "Encerrar sem ponto" revela a resposta sem pontuar.
 
 ## Dicas em uso
 
