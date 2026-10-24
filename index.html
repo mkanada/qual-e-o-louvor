@@ -251,7 +251,7 @@ function finish(winner){
 // Trecho do YouTube em tela cheia, tocando sozinho; o apresentador fecha.
 function openStage(){
   closeStage();
-  const src = `https://www.youtube-nocookie.com/embed/${song.v}?start=${song.st}&end=${song.st+CLIP}&autoplay=1&rel=0&playsinline=1&modestbranding=1`;
+  const src = `https://www.youtube-nocookie.com/embed/${song.v}?start=${song.st}&end=${song.st+CLIP+20}&autoplay=1&rel=0&playsinline=1&modestbranding=1`;
   $("ytBox").innerHTML = `<iframe src="${src}" title="${esc(song.t)}" allow="autoplay; encrypted-media; fullscreen"></iframe>`;
   $("stage").hidden = false;
   if ($("stage").requestFullscreen) $("stage").requestFullscreen().catch(()=>{});  // sem suporte: o painel já cobre a tela
