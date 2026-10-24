@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Qual é o Louvor?</title>
+<meta name="description" content="Adivinhe o louvor a partir de poucas notas. Cada nota extra e cada dica custam pontos.">
+<style>
+:root{
+  --bg:#f6f3ec; --card:#fff; --ink:#1f2933; --muted:#6b7280; --line:#e3ded2;
+  --accent:#b4531c; --accent-ink:#fff; --ok:#1f7a4d; --bad:#b42318; --soft:#fbe9dc;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16130f; --card:#211d17; --ink:#f1ece2; --muted:#a39b8c; --line:#3a342a;
+    --accent:#e8883f; --accent-ink:#1a1208; --ok:#5fcf97; --bad:#ff8a7a; --soft:#33271b;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16130f; --card:#211d17; --ink:#f1ece2; --muted:#a39b8c; --line:#3a342a;
+  --accent:#e8883f; --accent-ink:#1a1208; --ok:#5fcf97; --bad:#ff8a7a; --soft:#33271b;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:640px;margin:0 auto;padding:20px 16px 48px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+h1{font-size:1.6rem;margin:0}
+.score{color:var(--muted);font-size:.9rem;text-align:right}
+.score b{color:var(--ink);font-size:1.1rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:16px}
+.notes{display:flex;gap:6px;margin:4px 0 14px}
+.dot{flex:1;height:10px;border-radius:5px;background:var(--line)}
+.dot.on{background:var(--accent)}
+button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:10px 14px}
+button:hover:not(:disabled){border-color:var(--accent)}
+button:disabled{opacity:.45;cursor:default}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.row>*{flex:1 1 auto}
+h2{font-size:1rem;margin:0 0 8px;color:var(--muted);font-weight:600}
+.guess{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.guess button{text-align:left}
+.guess button.wrong{border-color:var(--bad);color:var(--bad);text-decoration:line-through}
+.hint{background:var(--soft);border-radius:10px;padding:10px 12px;margin-top:10px}
+.hint small{display:block;color:var(--muted);font-weight:600;margin-bottom:2px}
+.msg{font-weight:600;margin:0 0 10px}
+.msg.ok{color:var(--ok)} .msg.bad{color:var(--bad)}
+footer{color:var(--muted);font-size:.85rem;margin-top:24px;text-align:center}
+@media (max-width:420px){.guess{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>🎵 Qual é o Louvor?</h1>
+    <div class="score">Pontos<br><b id="total">0</b> · rodada <span id="round">1</span>/10</div>
+  </header>
+
+  <section class="card" id="play">
+    <h2>Ouça as notas</h2>
+    <div class="notes" id="dots" aria-label="Notas liberadas"></div>
+    <div class="row">
+      <button class="primary" id="btnPlay">▶ Tocar <span id="nNotes">1</span> nota</button>
+      <button id="btnMore">+ Mais uma nota (−1)</button>
+    </div>
+  </section>
+
+  <section class="card" id="hintsCard">
+    <h2>Dicas (cada uma custa 1 ponto)</h2>
+    <div class="row" id="hintBtns"></div>
+    <div id="hintOut"></div>
+  </section>
+
+  <section class="card">
+    <h2>Qual é o louvor? (erro custa 1 ponto)</h2>
+    <div class="guess" id="guess"></div>
+  </section>
+
+  <section class="card" id="result" hidden>
+    <p class="msg" id="resMsg"></p>
+    <button class="primary" id="btnNext">Próxima música →</button>
+  </section>
+
+  <footer>Cada acerto vale de 1 a 10 pontos. <button id="btnTheme" style="padding:4px 10px;font-size:.8rem">🌓 tema</button></footer>
+</main>
+
+<script>
+const SONGS = [
+  {t:"Lado a lado", f:"lado-a-lado", s:"",
+   c:"Nem na frente, nem atrás. É como dois amigos caminhando ombro com ombro. O título repete a mesma palavra.",
+   p:"O quadrado tem quatro; a primeira letra do alfabeto; e de novo o que o quadrado tem quatro.",
+   b:"Como Rute com Noemi: aonde uma fosse, a outra iria junto.",
+   d:"Duas pessoas no mesmo banco, sem ninguém no meio."},
+  {t:"Santo santo santo", f:"santo-santo-santo", s:"",
+   c:"Uma só palavra dita três vezes, como os serafins proclamam diante do trono em Isaías 6.",
+   p:"O título de Antônio, Pedro e Paulo, repetido três vezes.",
+   b:"O que os serafins de Isaías 6 clamam diante do trono.",
+   d:"O nome da cidade do litoral paulista, sem o \"s\" do final, dito três vezes."},
+  {t:"Vencendo vem Jesus", f:"vencendo-vem", s:"",
+   c:"Ele não chega perdendo nem empatando, chega triunfante. São três palavras e a última é o nome do Salvador.",
+   p:"O que o time faz quando está na frente do placar; o contrário de \"vai\"; o nome que está acima de todo nome.",
+   b:"O cavaleiro do cavalo branco, chamado Fiel e Verdadeiro, em Apocalipse 19.",
+   d:"Um exército em marcha triunfal, e quem vai à frente é o Rei."},
+  {t:"Canção da vida", f:"cancao-vida", s:"",
+   c:"Não é uma canção qualquer. É a que acompanha a existência inteira, do primeiro ao último fôlego.",
+   p:"Música com letra; \"de\" junto com \"a\"; o que Jesus disse ser, junto com o caminho e a verdade.",
+   b:"No Salmo 104, o salmista promete cantar ao Senhor enquanto viver.",
+   d:"Se a vida fosse um filme, seria a trilha sonora dele."},
+  {t:"Sou de Jesus", f:"sou-de-jesus", s:"",
+   c:"Uma declaração de pertencimento: não sou meu, nem do mundo. São três palavras, em primeira pessoa.",
+   p:"\"Eu ___ feliz\", com o verbo ser; a palavra que indica posse; o nome do Salvador.",
+   b:"Em 1 Coríntios 6, Paulo lembra que não somos de nós mesmos, fomos comprados por preço.",
+   d:"Como a etiqueta na mochila que diz a quem ela pertence."},
+  {t:"A esperança é Jesus", f:"esperanca", s:"",
+   c:"Das três virtudes de 1 Coríntios 13 (fé, esperança e amor), uma delas ganha um nome próprio.",
+   p:"A primeira letra do alfabeto; o que a cor verde simboliza; o verbo ser na terceira pessoa; o nome do Salvador.",
+   b:"Em 1 Timóteo 1:1, Paulo chama Cristo Jesus de \"nossa esperança\".",
+   d:"Dizem que é a última que morre, mas aqui ela tem nome."},
+  {t:"Meu farol", f:"meu-farol", s:"",
+   c:"Fica no alto, à beira-mar, e guia os navios na escuridão. No título, ele tem dono.",
+   p:"O que a criança grita segurando o brinquedo; a torre de luz à beira-mar, que o carro também tem.",
+   b:"O Salmo 119 chama a Palavra de lâmpada para os pés e luz para o caminho.",
+   d:"Na tempestade, o marinheiro só vê uma luz girando no alto, e ela é só dele."},
+  {t:"Vitória em nome de Jesus", f:"vitoria", s:"",
+   c:"O contrário de derrota, conquistada não pela própria força, mas invocando um Nome.",
+   p:"A capital do Espírito Santo; a preposição de \"___ casa\"; o que se escreve no crachá; a palavra que indica posse; o nome do Salvador.",
+   b:"Davi diante de Golias: não foi com espada, mas invocando o nome do Senhor.",
+   d:"O troféu é seu, mas a dedicatória vai para outro nome."},
+  {t:"Rumo ao lar", f:"rumo-ao-lar", s:"",
+   c:"Direção e destino. O viajante está a caminho de casa, a casa que fica no céu.",
+   p:"O que a bússola indica; \"a\" junto com \"o\"; doce ___, doce ___.",
+   b:"Em João 14, Jesus fala das muitas moradas na casa do Pai.",
+   d:"O fim da viagem, quando o GPS anuncia: destino, casa."},
+  {t:"Maranata", f:"maranata", s:"-nota",
+   c:"Uma palavra em aramaico, no fim de 1 Coríntios (16:22), que significa \"Vem, Senhor!\".",
+   p:"As águas amargas que Israel encontrou em Êxodo 15 (Mara) mais o creme que se forma no leite (nata).",
+   b:"A palavra aramaica do fim de 1 Coríntios, que significa \"Vem, Senhor!\".",
+   d:"A saudação da igreja primitiva para lembrar que o Rei está voltando."}
+];
+const MAX = 10;
+const $ = id => document.getElementById(id);
+const safe = (fn, d) => { try { return fn(); } catch { return d; } };
+
+let order, idx, song, notes, spent, hintsShown, wrong, total = 0, audio = null, done;
+
+function shuffle(a){ a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+const file = (s,n) => `${s.f}-${String(n).padStart(2,"0")}${s.s}.mp3`;
+const firstSentence = txt => { const m = txt.match(/^.*?[.!?](?=\s|$)/); return m ? m[0] : txt; };
+
+const HINTS = [
+  {k:"c1", label:"Charada (1ª frase)", get:s=>firstSentence(s.c)},
+  {k:"c",  label:"Charada completa",   get:s=>s.c, needs:"c1", skip:s=>firstSentence(s.c)===s.c},
+  {k:"p",  label:"Palavra a palavra",  get:s=>s.p},
+  {k:"b",  label:"Bíblica",            get:s=>s.b},
+  {k:"d",  label:"Do dia a dia",       get:s=>s.d},
+];
+
+function newGame(){ order = shuffle(SONGS.map((_,i)=>i)); idx = 0; total = 0; startRound(); }
+
+function startRound(){
+  stop();
+  song = SONGS[order[idx]];
+  notes = 1; spent = 0; hintsShown = []; wrong = new Set(); done = false;
+  $("round").textContent = idx+1;
+  $("total").textContent = total;
+  $("result").hidden = true;
+  $("hintOut").innerHTML = "";
+  renderDots(); renderHints(); renderGuess();
+}
+
+function renderDots(){
+  $("dots").innerHTML = Array.from({length:MAX},(_,i)=>`<div class="dot ${i<notes?"on":""}"></div>`).join("");
+  $("nNotes").textContent = notes;
+  $("btnPlay").lastChild.textContent = notes === 1 ? " nota" : " notas";
+  $("btnMore").disabled = done || notes >= MAX;
+}
+
+function renderHints(){
+  $("hintBtns").innerHTML = "";
+  HINTS.forEach(h => {
+    if (h.skip && h.skip(song)) return;
+    const b = document.createElement("button");
+    b.textContent = h.label;
+    b.disabled = done || hintsShown.includes(h.k) || (h.needs && !hintsShown.includes(h.needs));
+    b.onclick = () => {
+      hintsShown.push(h.k); spent++;
+      const out = document.createElement("div");
+      out.className = "hint";
+      out.innerHTML = `<small>${h.label}</small>`;
+      out.append(h.get(song));
+      $("hintOut").append(out);
+      renderHints();
+    };
+    $("hintBtns").append(b);
+  });
+}
+
+function renderGuess(){
+  $("guess").innerHTML = "";
+  SONGS.forEach((s,i) => {
+    const b = document.createElement("button");
+    b.textContent = s.t;
+    b.disabled = done;
+    if (wrong.has(i)) { b.className = "wrong"; b.disabled = true; }
+    b.onclick = () => guess(i);
+    $("guess").append(b);
+  });
+}
+
+function points(){ return Math.max(1, MAX - (notes-1) - spent - wrong.size); }
+
+function guess(i){
+  if (SONGS[i] === song) {
+    const p = points(); total += p; done = true;
+    $("total").textContent = total;
+    finish(`✅ Acertou: "${song.t}"! +${p} ponto${p>1?"s":""}`, "ok");
+  } else {
+    wrong.add(i); renderGuess();
+    if (wrong.size >= SONGS.length-1) { done = true; finish(`Era "${song.t}".`, "bad"); }
+  }
+}
+
+function finish(msg, cls){
+  renderDots(); renderHints(); renderGuess();
+  $("resMsg").textContent = msg; $("resMsg").className = "msg " + cls;
+  const last = idx === SONGS.length-1;
+  $("btnNext").textContent = last ? `Fim! Total: ${total} pontos — jogar de novo` : "Próxima música →";
+  $("result").hidden = false;
+}
+
+function stop(){ if (audio) { audio.pause(); audio = null; } }
+function play(){
+  stop();
+  audio = new Audio(file(song, notes));
+  audio.play().catch(()=>{});
+}
+
+$("btnPlay").onclick = play;
+$("btnMore").onclick = () => { if (notes < MAX) { notes++; renderDots(); play(); } };
+$("btnNext").onclick = () => { if (idx === SONGS.length-1) newGame(); else { idx++; startRound(); } };
+$("btnTheme").onclick = () => {
+  const cur = document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  document.documentElement.dataset.theme = cur === "dark" ? "light" : "dark";
+};
+newGame();
+</script>
+</body>
+</html>
