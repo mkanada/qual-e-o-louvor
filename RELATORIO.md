@@ -28,28 +28,15 @@ Atualizado em 24/10/2026.
 4. **Entrevista das dicas.** Fizemos título por título; as respostas estão em `dicas.md`.
 5. **Versão atual.** Campo de texto, comparação local, uma dica por música.
 
-## Como o jogo funciona
+## Como o jogo funciona (versão de dois times)
 
-- 10 rodadas, em ordem aleatória a cada partida. Não há repetição dentro de uma partida.
-- A dica da música aparece desde o início, de graça. O título fica escondido.
-- Começa com 1 nota. O botão "+ Mais uma nota" libera a seguinte (até 10) e toca de novo.
-- Um acerto vale `10 − (notas extras) − (erros)`, com mínimo de 1 ponto.
-- Cada erro custa 1 ponto. "Desistir" revela o título e vale 0.
-- No fim das 10 rodadas aparece o total e o botão de jogar de novo.
-- O tema segue o claro/escuro do aparelho e pode ser trocado pelo botão no rodapé.
-
-## Comparação das respostas
-
-Está em `index.html`, funções `norm`, `lev` e `matches`.
-
-- Normaliza: minúsculas, remove acentos e pontuação, junta espaços.
-- Aceita se a distância de edição (Levenshtein) for no máximo `floor(tamanho do título / 6)`, ou seja, cerca de um erro a cada 6 letras.
-- Além do título completo, aceita variantes, no campo `a` de cada música:
-  - "Vencendo vem"
-  - "Esperança é Jesus"
-  - "Vitória em nome"
-- Testado: aceita "lado a lado", "Santo, santo, santo!", "esperanca e jesus", "marana ta"; recusa "santo", "minha luz" e o título de outra música.
-- Para aceitar mais variantes, acrescente textos ao campo `a` da música em `SONGS`.
+- Tela inicial: nomes dos times e créditos de notas por time (padrão 5, vale para a partida toda).
+- 10 rodadas, músicas em ordem aleatória. A dica fica visível desde o início; a primeira nota é grátis.
+- Cada rodada começa por um time (alterna a cada rodada). O time gasta 1 crédito para liberar a nota seguinte (as notas liberadas ficam para todos). Sem créditos, só a dica.
+- O apresentador marca "Acertou" ou "Errou". Errou: passa para o outro time; se este também errar, vai para a plateia.
+- Na plateia, o apresentador escolhe quem ganha o ponto (time 1, time 2) ou "Ninguém acertou".
+- Ao fim da rodada, o título é revelado e toca um trecho de 10 segundos do YouTube (início definido por música em `SONGS`, campos `v` e `st`). Cada acerto vale 1 ponto.
+- Não há mais digitação nem comparação de texto: o julgamento é do apresentador.
 
 ## Dicas em uso
 

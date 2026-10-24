@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Qual é o Louvor?</title>
-<meta name="description" content="Adivinhe o louvor a partir de uma dica e de poucas notas. Cada nota extra e cada erro custam pontos.">
+<meta name="description" content="Jogo de dois times para adivinhar louvores com notas, dica e plateia.">
 <style>
 :root{
   --bg:#f6f3ec; --card:#fff; --ink:#1f2933; --muted:#6b7280; --line:#e3ded2;
@@ -45,6 +45,20 @@ h2{font-size:1rem;margin:0 0 8px;color:var(--muted);font-weight:600}
 .msg{font-weight:600;margin:0 0 10px}
 .msg.ok{color:var(--ok)} .msg.bad{color:var(--bad)}
 #feedback{min-height:1.5em;margin:8px 0 0;color:var(--bad);font-weight:600}
+.teams{display:flex;gap:8px;margin-top:16px}
+.team{flex:1;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:10px 12px;text-align:center}
+.team.turn{border-color:var(--accent);background:var(--soft)}
+.team .n{font-size:.85rem;color:var(--muted)}
+.team .p{font-size:1.6rem;font-weight:700;line-height:1.2}
+.team .c{font-size:.85rem;color:var(--muted)}
+.turnmsg{font-weight:700;font-size:1.15rem;margin:0 0 10px}
+label.f{display:block;margin:0 0 12px;color:var(--muted);font-size:.9rem}
+label.f input{margin-top:4px;color:var(--ink)}
+.yt{position:relative;aspect-ratio:16/9;margin:10px 0;border-radius:10px;overflow:hidden;background:#000}
+.yt iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+button.ok{background:var(--ok);color:#fff;border-color:var(--ok);font-weight:600}
+button.no{background:var(--bad);color:#fff;border-color:var(--bad);font-weight:600}
+[hidden]{display:none!important}
 footer{color:var(--muted);font-size:.85rem;margin-top:24px;text-align:center}
 </style>
 </head>
@@ -52,143 +66,173 @@ footer{color:var(--muted);font-size:.85rem;margin-top:24px;text-align:center}
 <main>
   <header>
     <h1>🎵 Qual é o Louvor?</h1>
-    <div class="score">Pontos<br><b id="total">0</b> · rodada <span id="round">1</span>/10</div>
+    <div class="score" id="roundBox" hidden>rodada <b id="round">1</b>/<span id="nrounds">10</span></div>
   </header>
 
-  <section class="card">
-    <h2>Dica</h2>
-    <div class="hint" id="hint"></div>
+  <section class="card" id="setup">
+    <h2>Novo jogo</h2>
+    <label class="f">Nome do time 1<input id="name1" value="Time 1" maxlength="20"></label>
+    <label class="f">Nome do time 2<input id="name2" value="Time 2" maxlength="20"></label>
+    <label class="f">Créditos de notas por time (para a partida toda)<input id="credits" type="number" min="0" max="99" value="5" inputmode="numeric"></label>
+    <button class="primary" id="btnStart" style="width:100%">Começar</button>
   </section>
 
-  <section class="card">
-    <h2>Ouça as notas</h2>
-    <div class="notes" id="dots" aria-label="Notas liberadas"></div>
-    <div class="row">
-      <button class="primary" id="btnPlay">▶ Tocar</button>
-      <button id="btnMore">+ Mais uma nota (−1)</button>
+  <div id="game" hidden>
+    <div class="teams">
+      <div class="team" id="team0"></div>
+      <div class="team" id="team1"></div>
     </div>
-  </section>
 
-  <section class="card">
-    <h2>Qual é o louvor? (cada erro custa 1 ponto)</h2>
-    <form class="row" id="form" autocomplete="off">
-      <input id="answer" type="text" placeholder="Digite o título" aria-label="Título do louvor" style="flex:3 1 200px">
-      <button class="primary" id="btnSend" type="submit" style="flex:1 1 90px">Responder</button>
-    </form>
-    <p id="feedback" role="status"></p>
-    <button id="btnGive" style="margin-top:8px">Desistir (0 ponto)</button>
-  </section>
+    <section class="card">
+      <p class="turnmsg" id="turnMsg"></p>
+      <h2>Dica</h2>
+      <div class="hint" id="hint"></div>
+    </section>
 
-  <section class="card" id="result" hidden>
-    <p class="msg" id="resMsg"></p>
-    <button class="primary" id="btnNext">Próxima música →</button>
-  </section>
+    <section class="card">
+      <h2>Notas</h2>
+      <div class="notes" id="dots" aria-label="Notas liberadas"></div>
+      <div class="row">
+        <button class="primary" id="btnPlay">▶ Tocar</button>
+        <button id="btnMore">+ Mais uma nota</button>
+      </div>
+    </section>
 
-  <footer>Cada acerto vale de 1 a 10 pontos. <button id="btnTheme" style="padding:4px 10px;font-size:.8rem">🌓 tema</button></footer>
+    <section class="card" id="judge">
+      <h2 id="judgeTitle">Apresentador</h2>
+      <div class="row" id="judgeTeam">
+        <button class="ok" id="btnHit">✔ Acertou</button>
+        <button class="no" id="btnMiss">✘ Errou</button>
+      </div>
+      <div class="row" id="judgeCrowd" hidden>
+        <button class="ok" id="btnCrowd0"></button>
+        <button class="ok" id="btnCrowd1"></button>
+        <button id="btnNobody">Ninguém acertou</button>
+      </div>
+    </section>
+
+    <section class="card" id="result" hidden>
+      <p class="msg" id="resMsg"></p>
+      <div class="yt" id="ytBox"></div>
+      <p><a id="ytLink" target="_blank" rel="noopener">Abrir no YouTube</a></p>
+      <button class="primary" id="btnNext">Próxima música →</button>
+    </section>
+  </div>
+
+  <footer><button id="btnTheme" style="padding:4px 10px;font-size:.8rem">🌓 tema</button></footer>
 </main>
 
 <script>
-// a: títulos aceitos além do título completo (comparados sem acento, caixa e pontuação)
+// v/st: vídeo do YouTube e segundo inicial do trecho; n: número no hinário
 const SONGS = [
-  {t:"Lado a lado", f:"lado-a-lado", s:"",
+  {t:"Lado a lado", f:"lado-a-lado", s:"", v:"ZrnPn--2-C0", st:20, n:245,
    h:"Nem à frente, nem atrás, duas vezes"},
-  {t:"Santo santo santo", f:"santo-santo-santo", s:"",
+  {t:"Santo santo santo", f:"santo-santo-santo", s:"", v:"FDpludwY46U", st:11, n:1,
    h:"Uma só palavra, dita três vezes"},
-  {t:"Vencendo vem Jesus", f:"vencendo-vem", s:"", a:["Vencendo vem"],
+  {t:"Vencendo vem Jesus", f:"vencendo-vem", s:"", v:"U4ym16En8xc", st:39, n:441,
    h:"Ele não chega perdendo, nem empatando"},
-  {t:"Canção da vida", f:"cancao-vida", s:"",
+  {t:"Canção da vida", f:"cancao-vida", s:"", v:"EyOkqnp-boI", st:37, n:375,
    h:"Não é uma canção qualquer. É a que acompanha a existência inteira, do primeiro ao último fôlego."},
-  {t:"Sou de Jesus", f:"sou-de-jesus", s:"",
+  {t:"Sou de Jesus", f:"sou-de-jesus", s:"", v:"lNnC4Lj998s", st:69, n:162,
    h:"Em 1 Coríntios 6, Paulo lembra que não somos de nós mesmos, fomos comprados por preço."},
-  {t:"A esperança é Jesus", f:"esperanca", s:"", a:["Esperança é Jesus"],
+  {t:"A esperança é Jesus", f:"esperanca", s:"", v:"8hKR6ohrexE", st:91, n:33,
    h:"Dizem que é a última que morre, mas aqui ela tem nome."},
-  {t:"Meu farol", f:"meu-farol", s:"",
+  {t:"Meu farol", f:"meu-farol", s:"", v:"kO1XALdcp_4", st:58,
    h:"Na tempestade, é importante para o marinheiro"},
-  {t:"Vitória em nome de Jesus", f:"vitoria", s:"", a:["Vitória em nome"],
+  {t:"Vitória em nome de Jesus", f:"vitoria", s:"", v:"J-YH-Nojg6E", st:95,
    h:"O contrário de derrota, conquistada não pela própria força, mas invocando um Nome."},
-  {t:"Rumo ao lar", f:"rumo-ao-lar", s:"",
+  {t:"Rumo ao lar", f:"rumo-ao-lar", s:"", v:"Qrv5FNt_AKo", st:50,
    h:"O que a bússola indica, alguns chamam de doce"},
-  {t:"Maranata", f:"maranata", s:"-nota",
+  {t:"Maranata", f:"maranata", s:"-nota", v:"Y0HKm6tsNV4", st:159,
    h:"Saudação adventista"}
 ];
-const MAX = 10;
+const MAX = 10, CLIP = 10;
 const $ = id => document.getElementById(id);
 
-let order, idx, song, notes, wrong, total = 0, audio = null, done;
+let order, idx, song, notes, done, turn, phase; // phase: "team" (vez de um time) | "crowd"
+let names, credits, score, first, audio = null;
 
 function shuffle(a){ a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
 const file = (s,n) => `${s.f}-${String(n).padStart(2,"0")}${s.s}.mp3`;
+const esc = x => x.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
-const norm = x => x.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase()
-  .replace(/[^a-z0-9 ]+/g," ").replace(/\s+/g," ").trim();
-
-function lev(a, b){
-  const d = Array.from({length:a.length+1},(_,i)=>[i]);
-  for (let j=1;j<=b.length;j++) d[0][j]=j;
-  for (let i=1;i<=a.length;i++) for (let j=1;j<=b.length;j++)
-    d[i][j] = Math.min(d[i-1][j]+1, d[i][j-1]+1, d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
-  return d[a.length][b.length];
+function newGame(){
+  names = [$("name1").value.trim() || "Time 1", $("name2").value.trim() || "Time 2"];
+  const c = Math.max(0, Math.min(99, parseInt($("credits").value, 10) || 0));
+  credits = [c, c]; score = [0, 0];
+  order = shuffle(SONGS.map((_,i)=>i)); idx = 0;
+  $("nrounds").textContent = SONGS.length;
+  $("setup").hidden = true; $("game").hidden = false; $("roundBox").hidden = false;
+  startRound();
 }
 
-// aceita se a distância de edição for pequena (≈ 1 erro a cada 6 letras)
-function matches(input, s){
-  const x = norm(input);
-  if (!x) return false;
-  return [s.t, ...(s.a||[])].some(c => {
-    const y = norm(c);
-    return lev(x, y) <= Math.floor(y.length / 6);
+function renderTeams(){
+  [0,1].forEach(i => {
+    const el = $("team"+i);
+    el.className = "team" + (!done && phase === "team" && turn === i ? " turn" : "");
+    el.innerHTML = `<div class="n">${esc(names[i])}</div><div class="p">${score[i]}</div><div class="c">${credits[i]} crédito${credits[i]===1?"":"s"}</div>`;
   });
 }
-
-function newGame(){ order = shuffle(SONGS.map((_,i)=>i)); idx = 0; total = 0; startRound(); }
 
 function startRound(){
   stop();
   song = SONGS[order[idx]];
-  notes = 1; wrong = 0; done = false;
+  notes = 1; done = false; phase = "team";
+  first = idx % 2; turn = first;            // alterna quem começa
   $("round").textContent = idx+1;
-  $("total").textContent = total;
   $("hint").textContent = song.h;
-  $("result").hidden = true;
-  $("answer").value = ""; $("answer").disabled = false; $("btnSend").disabled = false;
-  $("btnGive").disabled = false; $("feedback").textContent = "";
-  renderDots();
-  $("answer").focus();
+  $("result").hidden = true; $("ytBox").innerHTML = "";
+  render();
 }
 
-function renderDots(){
+function render(){
+  renderTeams();
   $("dots").innerHTML = Array.from({length:MAX},(_,i)=>`<div class="dot ${i<notes?"on":""}"></div>`).join("");
   $("btnPlay").textContent = `▶ Tocar ${notes} ${notes === 1 ? "nota" : "notas"}`;
-  $("btnMore").disabled = done || notes >= MAX;
+  const team = phase === "team" && !done;
+  const left = team ? credits[turn] : 0;
+  $("btnMore").disabled = !team || notes >= MAX || left < 1;
+  $("btnMore").textContent = team
+    ? (left < 1 ? "Sem créditos: só a dica" : `+ Mais uma nota (−1 crédito, restam ${left})`)
+    : "+ Mais uma nota";
+  $("judge").hidden = done;
+  $("judgeTeam").hidden = phase !== "team";
+  $("judgeCrowd").hidden = phase !== "crowd";
+  $("turnMsg").textContent = done ? "" : phase === "team" ? `Vez de: ${names[turn]}` : "Vez da plateia";
+  $("judgeTitle").textContent = phase === "team" ? "Apresentador: o time acertou?" : "Apresentador: a plateia vai falando. Quando acertar, quem ganha o ponto?";
+  $("btnCrowd0").textContent = `Ponto: ${names[0]}`;
+  $("btnCrowd1").textContent = `Ponto: ${names[1]}`;
 }
 
-const points = () => Math.max(1, MAX - (notes-1) - wrong);
-
-function end(msg, cls){
-  done = true;
-  $("answer").disabled = true; $("btnSend").disabled = true; $("btnGive").disabled = true;
-  renderDots();
-  $("resMsg").textContent = msg; $("resMsg").className = "msg " + cls;
+function finish(winner){
+  done = true; stop();
+  if (winner !== null) score[winner]++;
   const last = idx === SONGS.length-1;
-  $("btnNext").textContent = last ? `Fim! Total: ${total} pontos — jogar de novo` : "Próxima música →";
+  $("resMsg").className = "msg " + (winner !== null ? "ok" : "bad");
+  $("resMsg").textContent = (winner !== null ? `✅ ${names[winner]} ganha o ponto! ` : "Ninguém acertou. ")
+    + `Era "${song.t}"` + (song.n ? ` (hino ${song.n})` : "") + ".";
+  const src = `https://www.youtube-nocookie.com/embed/${song.v}?start=${song.st}&end=${song.st+CLIP}&autoplay=1&rel=0&playsinline=1`;
+  $("ytBox").innerHTML = `<iframe src="${src}" title="${esc(song.t)}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+  $("ytLink").href = `https://youtu.be/${song.v}?t=${song.st}`;
+  if (last) {
+    const [a,b] = score;
+    $("btnNext").textContent = `Fim! ${a===b ? "Empate" : "Vitória: " + names[a>b?0:1]} (${a} × ${b}) — novo jogo`;
+  } else $("btnNext").textContent = "Próxima música →";
   $("result").hidden = false;
-  $("btnNext").focus();
+  render();
+  $("result").scrollIntoView({behavior:"smooth", block:"nearest"});
 }
 
-$("form").onsubmit = e => {
-  e.preventDefault();
-  if (done || !$("answer").value.trim()) return;
-  if (matches($("answer").value, song)) {
-    const p = points(); total += p; $("total").textContent = total;
-    end(`✅ Acertou: "${song.t}"! +${p} ponto${p>1?"s":""}`, "ok");
-  } else {
-    wrong++;
-    $("feedback").textContent = "Não é essa. −1 ponto";
-    $("answer").select();
-  }
+$("btnStart").onclick = newGame;
+$("btnHit").onclick = () => { if (!done && phase === "team") finish(turn); };
+$("btnMiss").onclick = () => {
+  if (done || phase !== "team") return;
+  if (turn === first) turn = 1 - first; else phase = "crowd";
+  render();
 };
-
-$("btnGive").onclick = () => end(`Era "${song.t}".`, "bad");
+$("btnCrowd0").onclick = () => { if (!done && phase === "crowd") finish(0); };
+$("btnCrowd1").onclick = () => { if (!done && phase === "crowd") finish(1); };
+$("btnNobody").onclick = () => { if (!done && phase === "crowd") finish(null); };
 
 function stop(){ if (audio) { audio.pause(); audio = null; } }
 function play(){
@@ -198,13 +242,19 @@ function play(){
 }
 
 $("btnPlay").onclick = play;
-$("btnMore").onclick = () => { if (notes < MAX) { notes++; renderDots(); play(); } };
-$("btnNext").onclick = () => { if (idx === SONGS.length-1) newGame(); else { idx++; startRound(); } };
+$("btnMore").onclick = () => {
+  if (done || phase !== "team" || notes >= MAX || credits[turn] < 1) return;
+  credits[turn]--; notes++; render(); play();
+};
+$("btnNext").onclick = () => {
+  if (idx === SONGS.length-1) {
+    $("game").hidden = true; $("roundBox").hidden = true; $("setup").hidden = false;
+  } else { idx++; startRound(); }
+};
 $("btnTheme").onclick = () => {
   const cur = document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
   document.documentElement.dataset.theme = cur === "dark" ? "light" : "dark";
 };
-newGame();
 </script>
 </body>
 </html>
