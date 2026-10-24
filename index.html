@@ -31,9 +31,10 @@
   --t0:#ff9a47; --t1:#3fd9d2; --shadow:0 6px 0 rgba(0,0,0,.35);
 }
 *{box-sizing:border-box}
+html{font-size:clamp(16px,min(1.3vw,2.2vh),30px)}
 body{margin:0;min-height:100vh;color:var(--ink);
   background:linear-gradient(135deg,var(--bg1),var(--bg2) 50%,var(--bg3)) fixed;
-  font:17px/1.5 "Trebuchet MS","Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+  font:1.06rem/1.5 "Trebuchet MS","Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
 main{max-width:640px;margin:0 auto;padding:20px 16px 48px}
 header{display:flex;justify-content:space-between;align-items:center;gap:12px}
 h1{font-size:1.9rem;margin:0;line-height:1.15;font-weight:900;
@@ -43,7 +44,7 @@ h1 span{display:inline-block;color:initial;-webkit-text-fill-color:initial;anima
 @keyframes bob{50%{transform:translateY(-5px) rotate(12deg)}}
 .score{color:var(--muted);font-size:.9rem;text-align:right;background:var(--card);border-radius:999px;padding:6px 14px;box-shadow:var(--shadow)}
 .score b{color:var(--accent);font-size:1.2rem}
-.card{background:var(--card);border:3px solid var(--line);border-radius:22px;padding:18px;margin-top:16px;box-shadow:var(--shadow)}
+.card{background:var(--card);border:3px solid var(--line);border-radius:22px;padding:1.1rem;margin-top:1rem;box-shadow:var(--shadow)}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
 .chip{flex:1 0 40px;padding:8px 0;border-radius:999px;font-weight:800;text-align:center;
   background:var(--card);border:3px solid var(--line);color:var(--muted)}
@@ -74,7 +75,6 @@ h2{font-size:1rem;margin:0 0 8px;color:var(--accent);font-weight:800;text-transf
 #team0 .n{color:var(--t0)} #team1 .n{color:var(--t1)}
 .team .p{font-size:2.1rem;font-weight:900;line-height:1.15}
 .team .c{font-size:.85rem;color:var(--muted)}
-.turnmsg{font-weight:900;font-size:1.25rem;margin:0 0 10px}
 label.f{display:block;margin:0 0 12px;color:var(--muted);font-size:.9rem;font-weight:700}
 label.f input{margin-top:4px;color:var(--ink)}
 #stage{position:fixed;inset:0;z-index:10;background:#000}
@@ -83,11 +83,32 @@ label.f input{margin-top:4px;color:var(--ink)}
 button.ok{background:var(--ok);color:#fff;border-color:var(--ok);font-weight:700}
 button.no{background:var(--bad);color:#fff;border-color:var(--bad);font-weight:700}
 [hidden]{display:none!important}
+.banner{border-radius:22px;padding:.8rem 1rem;font-size:1.35rem;font-weight:900;text-align:center;margin-top:1rem;color:#fff;background:var(--t0);box-shadow:var(--shadow)}
+.banner.t1{background:var(--t1)}
+.banner.crowd{background:linear-gradient(135deg,var(--accent),#7950f2);animation:pulse 1.2s ease-in-out infinite}
+.banner small{display:block;font-size:.85rem;font-weight:700;opacity:.9}
+@keyframes pulse{50%{transform:scale(1.03)}}
+.steps{display:flex;gap:6px;margin-bottom:.8rem;font-size:.85rem;font-weight:800;flex-wrap:wrap}
+.step{flex:1 1 0;text-align:center;border-radius:999px;padding:4px 8px;background:var(--line);color:var(--muted)}
+.step.now{background:var(--accent);color:var(--accent-ink);transform:scale(1.06)}
+.step.past{text-decoration:line-through}
+.tries li.skip{color:var(--muted)} .tries li.skip::before{content:"⏭ "}
+.cols{display:block}
+@media (min-aspect-ratio:3/2) and (min-width:900px){
+  main{max-width:1800px;padding:1rem 2rem 1.5rem}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:0 1.5rem;align-items:start}
+  .hint{font-size:1.5rem}
+  .chip{padding:.6rem 0;font-size:1.2rem}
+  .banner{font-size:1.9rem}
+  .team .p{font-size:3rem}
+  .team .n{font-size:1.2rem}
+  input{font-size:1.3rem}
+}
 .tries{list-style:none;margin:10px 0 0;padding:0;color:var(--bad);font-weight:700}
 .tries li::before{content:"✘ "}
 #confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:20}
 footer{color:var(--muted);font-size:.85rem;margin-top:24px;text-align:center}
-@media (prefers-reduced-motion: reduce){h1 span{animation:none} button{transition:none}}
+@media (prefers-reduced-motion: reduce){h1 span,.banner.crowd{animation:none} button{transition:none}}
 </style>
 </head>
 <body>
@@ -111,40 +132,52 @@ footer{color:var(--muted);font-size:.85rem;margin-top:24px;text-align:center}
       <div class="team" id="team1"></div>
     </div>
 
-    <section class="card">
-      <p class="turnmsg" id="turnMsg"></p>
-      <h2>Dica</h2>
-      <div class="hint" id="hint"></div>
-    </section>
+    <div class="cols">
+      <div class="col">
+        <section class="card">
+          <h2>Dica</h2>
+          <div class="hint" id="hint"></div>
+        </section>
 
-    <section class="card">
-      <h2>Quantas notas?</h2>
-      <div class="chips" id="dots" role="group" aria-label="Número de notas"></div>
-      <p class="cost" id="cost"></p>
-      <button class="primary" id="btnPlay" style="width:100%">▶ Tocar</button>
-    </section>
+        <section class="card">
+          <h2>Quantas notas?</h2>
+          <div class="chips" id="dots" role="group" aria-label="Número de notas"></div>
+          <p class="cost" id="cost"></p>
+          <button class="primary" id="btnPlay" style="width:100%">▶ Tocar</button>
+        </section>
+      </div>
 
-    <section class="card" id="judge">
-      <h2 id="judgeTitle"></h2>
-      <form class="row" id="form" autocomplete="off">
-        <input id="answer" type="text" placeholder="Digite a resposta" aria-label="Resposta" style="flex:3 1 200px">
-        <button class="primary" type="submit" style="flex:1 1 90px">Responder</button>
-      </form>
-      <ul class="tries" id="tries"></ul>
-      <button id="btnGive" style="margin-top:12px">Encerrar sem ponto</button>
-    </section>
+      <div class="col">
+        <div class="banner" id="banner"></div>
 
-    <section class="card" id="result" hidden>
-      <p class="msg" id="resMsg"></p>
-      <p><button id="btnReplay">▶ Rever o trecho</button> <a id="ytLink" target="_blank" rel="noopener">Abrir no YouTube</a></p>
-      <button class="primary" id="btnNext">Próxima música →</button>
-    </section>
+        <section class="card" id="judge">
+          <div class="steps" id="steps"></div>
+          <h2 id="judgeTitle"></h2>
+          <form class="row" id="form" autocomplete="off">
+            <input id="answer" type="text" placeholder="Digite a resposta" aria-label="Resposta" style="flex:3 1 200px">
+            <button class="primary" type="submit" style="flex:1 1 90px">Responder</button>
+          </form>
+          <ul class="tries" id="tries"></ul>
+          <div class="row" style="margin-top:12px">
+            <button id="btnPass">⏭ Passar a vez</button>
+            <button id="btnCrowd">👏 Chamar a plateia agora</button>
+            <button id="btnGive">Encerrar sem ponto</button>
+          </div>
+        </section>
+
+        <section class="card" id="result" hidden>
+          <p class="msg" id="resMsg"></p>
+          <p><button id="btnReplay">▶ Rever o trecho</button> <a id="ytLink" target="_blank" rel="noopener">Abrir no YouTube</a></p>
+          <button class="primary" id="btnNext">Próxima música →</button>
+        </section>
+      </div>
+    </div>
   </div>
 
   <canvas id="confetti"></canvas>
   <div id="stage" hidden><button id="btnCloseStage">✕ Fechar</button><div id="ytBox"></div></div>
 
-  <footer><button id="btnTheme" style="padding:4px 10px;font-size:.8rem">🌓 tema</button></footer>
+  <footer><button id="btnTheme" style="padding:4px 10px;font-size:.8rem">🌓 tema</button> <button id="btnReset" style="padding:4px 10px;font-size:.8rem" hidden>↺ reiniciar jogo</button></footer>
 </main>
 
 <script>
@@ -174,7 +207,7 @@ const SONGS = [
 const MAX = 10, CLIP = 10;
 const $ = id => document.getElementById(id);
 
-let order, idx, song, notes, sel, done, celebrate = false, first, tries, score, credits, names, audio = null;
+let order, idx, song, notes, sel, done, won = null, playing = false, celebrate = false, first, tries, score, credits, names, audio = null;
 
 function shuffle(a){ a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
 const file = (s,n) => `${s.f}-${String(n).padStart(2,"0")}${s.s}.mp3`;
@@ -214,9 +247,37 @@ function newGame(){
   const c = Math.max(0, Math.min(99, parseInt($("credits").value, 10) || 0));
   credits = [c, c]; score = [0, 0];
   order = shuffle(SONGS.map((_,i)=>i)); idx = 0;
-  $("nrounds").textContent = SONGS.length;
-  $("setup").hidden = true; $("game").hidden = false; $("roundBox").hidden = false;
+  playing = true;
+  showGame();
   startRound();
+}
+function showGame(){
+  $("nrounds").textContent = SONGS.length;
+  $("setup").hidden = true; $("game").hidden = false; $("roundBox").hidden = false; $("btnReset").hidden = false;
+}
+
+// o estado do jogo fica no navegador: se a energia cair, tudo volta ao reabrir a página
+const KEY = "qual-e-o-louvor:v1";
+function save(){
+  if (!playing) return;
+  try { localStorage.setItem(KEY, JSON.stringify({names, credits, score, order, idx, notes, sel, done, won, first, tries})); } catch {}
+}
+function forget(){ playing = false; try { localStorage.removeItem(KEY); } catch {} }
+function restore(){
+  try {
+    const d = JSON.parse(localStorage.getItem(KEY));
+    if (!d || !Array.isArray(d.order) || d.order.length !== SONGS.length || !SONGS[d.order[d.idx]]) return false;
+    ({names, credits, score, order, idx, notes, sel, done, won, first, tries} = d);
+    if (!Array.isArray(tries) || !Array.isArray(names) || !Array.isArray(credits) || !Array.isArray(score)) return false;
+    playing = true;
+  } catch { return false; }
+  song = SONGS[order[idx]];
+  showGame();
+  $("round").textContent = idx+1;
+  $("hint").textContent = song.h;
+  if (done) showResult(won);
+  render();
+  return true;
 }
 
 function startRound(){
@@ -251,15 +312,32 @@ function render(){
     : extra > 0 ? `${sel} notas: custa ${extra} crédito${extra===1?"":"s"} (restam ${left - extra} depois)`
     : `${sel} ${sel===1?"nota":"notas"}: grátis. Você tem ${left} crédito${left===1?"":"s"} para notas extras.`;
   $("btnPlay").textContent = `▶ Tocar ${sel} ${sel === 1 ? "nota" : "notas"}`;
-  $("turnMsg").textContent = done ? "" : `Vez de: ${who(a)}`;
+  $("banner").hidden = done;
+  $("banner").className = "banner" + (a.crowd ? " crowd" : a.team === 1 ? " t1" : "");
+  $("banner").innerHTML = a.crowd
+    ? `👏 VEZ DA PLATEIA DE ${esc(names[a.team].toUpperCase())}!<small>A plateia fala em voz alta e o apresentador digita</small>`
+    : `🎯 Vez de ${esc(names[a.team])}`;
   $("judge").hidden = done;
-  $("judgeTitle").textContent = `Digite a resposta de: ${who(a)}`;
-  $("tries").innerHTML = tries.map(t => `<li>${esc(t.text)} <small>(${esc(t.by)})</small></li>`).join("");
+  const stepNames = [names[first], names[1-first], "Plateia"];
+  $("steps").innerHTML = stepNames.map((n,i)=>`<span class="step ${i === Math.min(k,2) ? "now" : i < k ? "past" : ""}">${i+1}. ${esc(n)}</span>`).join("");
+  $("judgeTitle").textContent = a.crowd ? `Digite o que a plateia de ${names[a.team]} falou` : `Digite a resposta de: ${names[a.team]}`;
+  $("btnPass").textContent = k >= 2 ? "⏭ Passar para a outra plateia" : "⏭ Passar a vez";
+  $("btnCrowd").hidden = k >= 2;
+  $("tries").innerHTML = tries.map(t => `<li class="${t.skip ? "skip" : ""}">${esc(t.text)} <small>(${esc(t.by)})</small></li>`).join("");
+  save();
 }
 
 function finish(winner){
-  done = true; stop();
+  done = true; won = winner; stop();
   if (winner !== null) score[winner]++;
+  celebrate = winner !== null;
+  showResult(winner);
+  render();
+  $("result").scrollIntoView({behavior:"smooth", block:"nearest"});
+  openStage();   // ainda dentro do clique/Enter do apresentador: o navegador libera tela cheia e som
+}
+
+function showResult(winner){
   const last = idx === SONGS.length-1;
   $("resMsg").className = "msg " + (winner !== null ? "ok" : "bad");
   $("resMsg").textContent = (winner !== null ? `✅ ${names[winner]} ganha o ponto! ` : "Ninguém ganhou o ponto. ")
@@ -269,11 +347,7 @@ function finish(winner){
     const [x,y] = score;
     $("btnNext").textContent = `Fim! ${x===y ? "Empate" : "Vitória: " + names[x>y?0:1]} (${x} × ${y}) — novo jogo`;
   } else $("btnNext").textContent = "Próxima música →";
-  celebrate = winner !== null;
   $("result").hidden = false;
-  render();
-  $("result").scrollIntoView({behavior:"smooth", block:"nearest"});
-  openStage();   // ainda dentro do clique/Enter do apresentador: o navegador libera tela cheia e som
 }
 
 // Trecho do YouTube em tela cheia, tocando sozinho; o apresentador fecha.
@@ -325,6 +399,17 @@ $("form").onsubmit = e => {
   $("answer").focus();
 };
 
+// o apresentador pode pular a vez de quem está respondendo, ou ir direto para a plateia
+function skipTo(n){
+  if (done) return;
+  commit();
+  while (tries.length < n) tries.push({text:"passou", by: who(actor(tries.length)), skip:true});
+  render();
+  $("answer").focus();
+}
+$("btnPass").onclick = () => skipTo(tries.length + 1);
+$("btnCrowd").onclick = () => skipTo(2);
+
 $("btnGive").onclick = () => { if (!done) finish(null); };
 
 function stop(){ if (audio) { audio.pause(); audio = null; } }
@@ -348,13 +433,20 @@ $("dots").onclick = e => {
 };
 $("btnNext").onclick = () => {
   if (idx === SONGS.length-1) {
-    $("game").hidden = true; $("roundBox").hidden = true; $("setup").hidden = false;
+    forget();
+    $("game").hidden = true; $("roundBox").hidden = true; $("setup").hidden = false; $("btnReset").hidden = true;
   } else { idx++; startRound(); }
+};
+$("btnReset").onclick = () => {
+  if (!confirm("Reiniciar o jogo? O placar e o progresso serão apagados.")) return;
+  forget(); stop(); closeStage();
+  $("game").hidden = true; $("roundBox").hidden = true; $("setup").hidden = false; $("btnReset").hidden = true;
 };
 $("btnTheme").onclick = () => {
   const cur = document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
   document.documentElement.dataset.theme = cur === "dark" ? "light" : "dark";
 };
+restore();
 </script>
 </body>
 </html>

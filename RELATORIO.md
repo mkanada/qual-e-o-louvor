@@ -66,3 +66,9 @@ git add -A && git commit -m "mensagem" && git push
 ```
 
 A atualização aparece no site em alguns minutos.
+
+## Ajustes depois da apresentação ao vivo
+
+- **TV 16:9:** em telas largas o jogo usa duas colunas (dica e notas à esquerda; vez, resposta e resultado à direita) e a fonte escala com o tamanho da tela.
+- **Plateia mais clara:** faixa grande no topo da coluna da direita mostra de quem é a vez (na plateia, fica roxa e pulsando, com "VEZ DA PLATEIA DE …"). Uma barra 1. time, 2. time, 3. plateia mostra em que etapa está. O apresentador pode "Passar a vez" a qualquer momento e "Chamar a plateia agora" nas duas primeiras etapas.
+- **Estado salvo no navegador:** placar, créditos, notas, tentativas e ordem das músicas ficam em `localStorage` a cada mudança. Ao reabrir a página o jogo continua do ponto em que parou. "↺ reiniciar jogo" (rodapé) apaga tudo. É preciso reabrir no mesmo navegador e no mesmo endereço.
