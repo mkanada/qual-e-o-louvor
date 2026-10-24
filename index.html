@@ -6,69 +6,94 @@
 <title>Qual é o Louvor?</title>
 <meta name="description" content="Jogo de dois times para adivinhar louvores com notas, dica e plateia.">
 <style>
+/* tema festivo: cores vivas, gradiente, cantos bem redondos e confete */
 :root{
-  --bg:#f6f3ec; --card:#fff; --ink:#1f2933; --muted:#6b7280; --line:#e3ded2;
-  --accent:#b4531c; --accent-ink:#fff; --ok:#1f7a4d; --bad:#b42318; --soft:#fbe9dc;
+  --bg1:#ffe3f1; --bg2:#fff3c4; --bg3:#d9f1ff;
+  --card:#fff; --ink:#2b1b4a; --muted:#7a6a99; --line:#f0d9ea;
+  --accent:#e6399b; --accent2:#ff9f1c; --accent-ink:#fff;
+  --ok:#12a150; --bad:#e03131; --soft:#fff0b8;
+  --t0:#ff7a1a; --t1:#11a6a0; --shadow:0 6px 0 rgba(230,57,155,.18);
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#16130f; --card:#211d17; --ink:#f1ece2; --muted:#a39b8c; --line:#3a342a;
-    --accent:#e8883f; --accent-ink:#1a1208; --ok:#5fcf97; --bad:#ff8a7a; --soft:#33271b;
+    --bg1:#2a1050; --bg2:#3a1450; --bg3:#12274d;
+    --card:#2c1b4d; --ink:#fff4fb; --muted:#c3a9e6; --line:#4d3380;
+    --accent:#ff5cb8; --accent2:#ffc44d; --accent-ink:#2a1050;
+    --ok:#4ee38a; --bad:#ff8080; --soft:#4a3370;
+    --t0:#ff9a47; --t1:#3fd9d2; --shadow:0 6px 0 rgba(0,0,0,.35);
   }
 }
 :root[data-theme="dark"]{
-  --bg:#16130f; --card:#211d17; --ink:#f1ece2; --muted:#a39b8c; --line:#3a342a;
-  --accent:#e8883f; --accent-ink:#1a1208; --ok:#5fcf97; --bad:#ff8a7a; --soft:#33271b;
+  --bg1:#2a1050; --bg2:#3a1450; --bg3:#12274d;
+  --card:#2c1b4d; --ink:#fff4fb; --muted:#c3a9e6; --line:#4d3380;
+  --accent:#ff5cb8; --accent2:#ffc44d; --accent-ink:#2a1050;
+  --ok:#4ee38a; --bad:#ff8080; --soft:#4a3370;
+  --t0:#ff9a47; --t1:#3fd9d2; --shadow:0 6px 0 rgba(0,0,0,.35);
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{margin:0;min-height:100vh;color:var(--ink);
+  background:linear-gradient(135deg,var(--bg1),var(--bg2) 50%,var(--bg3)) fixed;
+  font:17px/1.5 "Trebuchet MS","Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
 main{max-width:640px;margin:0 auto;padding:20px 16px 48px}
 header{display:flex;justify-content:space-between;align-items:center;gap:12px}
-h1{font-size:1.6rem;margin:0}
-.score{color:var(--muted);font-size:.9rem;text-align:right}
-.score b{color:var(--ink);font-size:1.1rem}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:16px}
-.notes{display:flex;gap:6px;margin:4px 0 14px}
-.dot{flex:1;height:10px;border-radius:5px;background:var(--line)}
-.dot.on{background:var(--accent)}
-button,input{font:inherit;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:10px 14px}
-button{cursor:pointer}
-button:hover:not(:disabled){border-color:var(--accent)}
-button:disabled{opacity:.45;cursor:default}
-button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+h1{font-size:1.9rem;margin:0;line-height:1.15;font-weight:900;
+  background:linear-gradient(90deg,var(--accent),var(--accent2),var(--t1));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+h1 span{display:inline-block;color:initial;-webkit-text-fill-color:initial;animation:bob 1.6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-5px) rotate(12deg)}}
+.score{color:var(--muted);font-size:.9rem;text-align:right;background:var(--card);border-radius:999px;padding:6px 14px;box-shadow:var(--shadow)}
+.score b{color:var(--accent);font-size:1.2rem}
+.card{background:var(--card);border:3px solid var(--line);border-radius:22px;padding:18px;margin-top:16px;box-shadow:var(--shadow)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
+.chip{flex:1 0 40px;padding:8px 0;border-radius:999px;font-weight:800;text-align:center;
+  background:var(--card);border:3px solid var(--line);color:var(--muted)}
+.chip.paid{background:var(--accent2);border-color:var(--accent2);color:#3a2300}
+.chip.sel{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);transform:scale(1.08)}
+.cost{margin:0 0 12px;font-weight:700;color:var(--muted)}
+button,input{font:inherit;border-radius:999px;border:3px solid var(--line);background:var(--card);color:var(--ink);padding:10px 18px}
+input{border-radius:16px}
+button{cursor:pointer;transition:transform .12s}
+button:hover:not(:disabled){border-color:var(--accent);transform:translateY(-2px) rotate(-1deg)}
+button:active:not(:disabled){transform:scale(.96)}
+button:disabled{opacity:.4;cursor:default}
+button.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;font-weight:800;text-shadow:0 1px 0 rgba(0,0,0,.2)}
 input{width:100%;min-width:0}
-input:focus{outline:2px solid var(--accent);outline-offset:1px}
+input:focus{outline:3px solid var(--accent2);outline-offset:1px}
 .row{display:flex;flex-wrap:wrap;gap:8px}
 .row>*{flex:1 1 auto}
-h2{font-size:1rem;margin:0 0 8px;color:var(--muted);font-weight:600}
-.hint{background:var(--soft);border-radius:10px;padding:12px 14px;font-size:1.1rem}
-.msg{font-weight:600;margin:0 0 10px}
+h2{font-size:1rem;margin:0 0 8px;color:var(--accent);font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.hint{background:var(--soft);border-radius:16px;padding:12px 14px;font-size:1.15rem;font-weight:600}
+.msg{font-weight:800;font-size:1.2rem;margin:0 0 10px}
 .msg.ok{color:var(--ok)} .msg.bad{color:var(--bad)}
-#feedback{min-height:1.5em;margin:8px 0 0;color:var(--bad);font-weight:600}
-.teams{display:flex;gap:8px;margin-top:16px}
-.team{flex:1;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:10px 12px;text-align:center}
-.team.turn{border-color:var(--accent);background:var(--soft)}
-.team .n{font-size:.85rem;color:var(--muted)}
-.team .p{font-size:1.6rem;font-weight:700;line-height:1.2}
+.teams{display:flex;gap:10px;margin-top:16px}
+.team{flex:1;background:var(--card);border:4px solid var(--line);border-radius:22px;padding:10px 12px;text-align:center;box-shadow:var(--shadow)}
+#team0{border-top-color:var(--t0)} #team1{border-top-color:var(--t1)}
+.team.turn{transform:scale(1.04);background:var(--soft)}
+#team0.turn{border-color:var(--t0)} #team1.turn{border-color:var(--t1)}
+.team .n{font-size:.95rem;font-weight:800}
+#team0 .n{color:var(--t0)} #team1 .n{color:var(--t1)}
+.team .p{font-size:2.1rem;font-weight:900;line-height:1.15}
 .team .c{font-size:.85rem;color:var(--muted)}
-.turnmsg{font-weight:700;font-size:1.15rem;margin:0 0 10px}
-label.f{display:block;margin:0 0 12px;color:var(--muted);font-size:.9rem}
+.turnmsg{font-weight:900;font-size:1.25rem;margin:0 0 10px}
+label.f{display:block;margin:0 0 12px;color:var(--muted);font-size:.9rem;font-weight:700}
 label.f input{margin-top:4px;color:var(--ink)}
 #stage{position:fixed;inset:0;z-index:10;background:#000}
 #stage iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 #stage button{position:absolute;top:12px;right:12px;z-index:1;opacity:.7}
-button.ok{background:var(--ok);color:#fff;border-color:var(--ok);font-weight:600}
-button.no{background:var(--bad);color:#fff;border-color:var(--bad);font-weight:600}
+button.ok{background:var(--ok);color:#fff;border-color:var(--ok);font-weight:700}
+button.no{background:var(--bad);color:#fff;border-color:var(--bad);font-weight:700}
 [hidden]{display:none!important}
-.tries{list-style:none;margin:10px 0 0;padding:0;color:var(--bad);font-weight:600}
+.tries{list-style:none;margin:10px 0 0;padding:0;color:var(--bad);font-weight:700}
 .tries li::before{content:"✘ "}
+#confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:20}
 footer{color:var(--muted);font-size:.85rem;margin-top:24px;text-align:center}
+@media (prefers-reduced-motion: reduce){h1 span{animation:none} button{transition:none}}
 </style>
 </head>
 <body>
 <main>
   <header>
-    <h1>🎵 Qual é o Louvor?</h1>
+    <h1><span>🎵</span> Qual é o Louvor? <span>🎉</span></h1>
     <div class="score" id="roundBox" hidden>rodada <b id="round">1</b>/<span id="nrounds">10</span></div>
   </header>
 
@@ -93,12 +118,10 @@ footer{color:var(--muted);font-size:.85rem;margin-top:24px;text-align:center}
     </section>
 
     <section class="card">
-      <h2>Notas</h2>
-      <div class="notes" id="dots" aria-label="Notas liberadas"></div>
-      <div class="row">
-        <button class="primary" id="btnPlay">▶ Tocar</button>
-        <button id="btnMore">+ Mais uma nota</button>
-      </div>
+      <h2>Quantas notas?</h2>
+      <div class="chips" id="dots" role="group" aria-label="Número de notas"></div>
+      <p class="cost" id="cost"></p>
+      <button class="primary" id="btnPlay" style="width:100%">▶ Tocar</button>
     </section>
 
     <section class="card" id="judge">
@@ -118,6 +141,7 @@ footer{color:var(--muted);font-size:.85rem;margin-top:24px;text-align:center}
     </section>
   </div>
 
+  <canvas id="confetti"></canvas>
   <div id="stage" hidden><button id="btnCloseStage">✕ Fechar</button><div id="ytBox"></div></div>
 
   <footer><button id="btnTheme" style="padding:4px 10px;font-size:.8rem">🌓 tema</button></footer>
@@ -150,7 +174,7 @@ const SONGS = [
 const MAX = 10, CLIP = 10;
 const $ = id => document.getElementById(id);
 
-let order, idx, song, notes, done, first, tries, score, credits, names, audio = null;
+let order, idx, song, notes, sel, done, celebrate = false, first, tries, score, credits, names, audio = null;
 
 function shuffle(a){ a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
 const file = (s,n) => `${s.f}-${String(n).padStart(2,"0")}${s.s}.mp3`;
@@ -198,7 +222,7 @@ function newGame(){
 function startRound(){
   stop();
   song = SONGS[order[idx]];
-  notes = 1; done = false; tries = [];
+  notes = 1; sel = 1; done = false; tries = [];
   first = idx % 2;                          // alterna quem começa
   $("round").textContent = idx+1;
   $("hint").textContent = song.h;
@@ -215,15 +239,18 @@ function render(){
     el.className = "team" + (!done && a.team === i ? " turn" : "");
     el.innerHTML = `<div class="n">${esc(names[i])}</div><div class="p">${score[i]}</div><div class="c">${credits[i]} crédito${credits[i]===1?"":"s"}</div>`;
   });
-  $("dots").innerHTML = Array.from({length:MAX},(_,i)=>`<div class="dot ${i<notes?"on":""}"></div>`).join("");
-  $("btnPlay").textContent = `▶ Tocar ${notes} ${notes === 1 ? "nota" : "notas"}`;
-  // só o time que começa compra notas, e só antes de responder
-  const canBuy = !done && k === 0;
-  const left = credits[first];
-  $("btnMore").disabled = !canBuy || notes >= MAX || left < 1;
-  $("btnMore").textContent = !canBuy ? "+ Mais uma nota"
-    : left < 1 ? "Sem créditos: só a dica"
-    : `+ Mais uma nota (−1 crédito, restam ${left})`;
+  // notes = notas já pagas; sel = escolhida (só vale pagar ao tocar ou responder)
+  const canPick = !done && k === 0, left = credits[first];
+  $("dots").innerHTML = Array.from({length:MAX},(_,i)=>{
+    const n = i+1;
+    const off = !canPick || n < notes || n - notes > left;
+    return `<button type="button" class="chip ${n <= notes ? "paid" : ""}${n > notes && n <= sel ? " sel" : ""}" data-n="${n}" ${off ? "disabled" : ""} aria-label="${n} ${n===1?"nota":"notas"}">${n}</button>`;
+  }).join("");
+  const extra = sel - notes;
+  $("cost").textContent = !canPick ? `${notes} ${notes===1?"nota liberada":"notas liberadas"}`
+    : extra > 0 ? `${sel} notas: custa ${extra} crédito${extra===1?"":"s"} (restam ${left - extra} depois)`
+    : `${sel} ${sel===1?"nota":"notas"}: grátis. Você tem ${left} crédito${left===1?"":"s"} para notas extras.`;
+  $("btnPlay").textContent = `▶ Tocar ${sel} ${sel === 1 ? "nota" : "notas"}`;
   $("turnMsg").textContent = done ? "" : `Vez de: ${who(a)}`;
   $("judge").hidden = done;
   $("judgeTitle").textContent = `Digite a resposta de: ${who(a)}`;
@@ -242,6 +269,7 @@ function finish(winner){
     const [x,y] = score;
     $("btnNext").textContent = `Fim! ${x===y ? "Empate" : "Vitória: " + names[x>y?0:1]} (${x} × ${y}) — novo jogo`;
   } else $("btnNext").textContent = "Próxima música →";
+  celebrate = winner !== null;
   $("result").hidden = false;
   render();
   $("result").scrollIntoView({behavior:"smooth", block:"nearest"});
@@ -260,6 +288,23 @@ function closeStage(){
   $("ytBox").innerHTML = "";
   $("stage").hidden = true;
   if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+  if (celebrate) { celebrate = false; confetti(); }
+}
+
+function confetti(){
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const c = $("confetti"), g = c.getContext("2d");
+  c.width = innerWidth; c.height = innerHeight;
+  const cols = ["#e6399b","#ff9f1c","#11a6a0","#ffd43b","#7950f2","#4dabf7"];
+  const bits = Array.from({length:140},()=>({x:Math.random()*c.width, y:-20-Math.random()*c.height*.5,
+    vx:(Math.random()-.5)*3, vy:2+Math.random()*4, r:Math.random()*6, vr:(Math.random()-.5)*.3,
+    w:6+Math.random()*6, h:10+Math.random()*8, col:cols[Math.floor(Math.random()*cols.length)]}));
+  const t0 = performance.now();
+  (function frame(t){
+    g.clearRect(0,0,c.width,c.height);
+    bits.forEach(b=>{ b.x+=b.vx; b.y+=b.vy; b.r+=b.vr; g.save(); g.translate(b.x,b.y); g.rotate(b.r); g.fillStyle=b.col; g.fillRect(-b.w/2,-b.h/2,b.w,b.h); g.restore(); });
+    if (t - t0 < 4000) requestAnimationFrame(frame); else g.clearRect(0,0,c.width,c.height);
+  })(t0);
 }
 document.addEventListener("fullscreenchange", () => { if (!document.fullscreenElement) closeStage(); });
 $("btnCloseStage").onclick = closeStage;
@@ -272,6 +317,7 @@ $("form").onsubmit = e => {
   const text = $("answer").value.trim();
   if (done || !text) return;
   const a = actor(tries.length);
+  commit();
   if (matches(text, song)) { finish(a.team); return; }
   tries.push({text, by: who(a)});
   $("answer").value = "";
@@ -282,16 +328,23 @@ $("form").onsubmit = e => {
 $("btnGive").onclick = () => { if (!done) finish(null); };
 
 function stop(){ if (audio) { audio.pause(); audio = null; } }
+// paga as notas escolhidas além das já liberadas (só o time que começa, antes de responder)
+function commit(){
+  if (done || tries.length > 0 || sel <= notes) return;
+  credits[first] -= sel - notes; notes = sel;
+}
 function play(){
+  commit(); render();
   stop();
   audio = new Audio(file(song, notes));
   audio.play().catch(()=>{});
 }
 
 $("btnPlay").onclick = play;
-$("btnMore").onclick = () => {
-  if (done || tries.length > 0 || notes >= MAX || credits[first] < 1) return;
-  credits[first]--; notes++; render(); play();
+$("dots").onclick = e => {
+  const n = +e.target.dataset.n;
+  if (!n || done || tries.length > 0 || n < notes || n - notes > credits[first]) return;
+  sel = n; render();
 };
 $("btnNext").onclick = () => {
   if (idx === SONGS.length-1) {
