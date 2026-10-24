@@ -72,3 +72,10 @@ A atualização aparece no site em alguns minutos.
 - **TV 16:9:** em telas largas o jogo usa duas colunas (dica e notas à esquerda; vez, resposta e resultado à direita) e a fonte escala com o tamanho da tela.
 - **Plateia mais clara:** faixa grande no topo da coluna da direita mostra de quem é a vez (na plateia, fica roxa e pulsando, com "VEZ DA PLATEIA DE …"). Uma barra 1. time, 2. time, 3. plateia mostra em que etapa está. O apresentador pode "Passar a vez" a qualquer momento e "Chamar a plateia agora" nas duas primeiras etapas.
 - **Estado salvo no navegador:** placar, créditos, notas, tentativas e ordem das músicas ficam em `localStorage` a cada mudança. Ao reabrir a página o jogo continua do ponto em que parou. "↺ reiniciar jogo" (rodapé) apaga tudo. É preciso reabrir no mesmo navegador e no mesmo endereço.
+
+## Tela sem rolagem
+
+- A página ocupa sempre a janela inteira (TV 16:9, celular deitado ou em pé), sem rolar. A fonte acompanha o tamanho da tela.
+- Linha de cima: título, placar dos dois times (pontos e créditos), rodada e os botões 💡 Dica, 🌓 tema e ↺ reiniciar.
+- Abaixo: faixa de quem é a vez com as etapas; à esquerda as notas, à direita a resposta, as últimas 4 tentativas e Passar / Chamar a plateia / Encerrar.
+- A dica abre por cima no início de cada rodada; um toque fecha, e o botão 💡 Dica reabre. O resultado também aparece por cima.

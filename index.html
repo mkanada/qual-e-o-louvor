@@ -12,7 +12,7 @@
   --card:#fff; --ink:#2b1b4a; --muted:#7a6a99; --line:#f0d9ea;
   --accent:#e6399b; --accent2:#ff9f1c; --accent-ink:#fff;
   --ok:#12a150; --bad:#e03131; --soft:#fff0b8;
-  --t0:#ff7a1a; --t1:#11a6a0; --shadow:0 6px 0 rgba(230,57,155,.18);
+  --t0:#ff7a1a; --t1:#11a6a0; --shadow:0 .3rem 0 rgba(230,57,155,.18);
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -20,7 +20,7 @@
     --card:#2c1b4d; --ink:#fff4fb; --muted:#c3a9e6; --line:#4d3380;
     --accent:#ff5cb8; --accent2:#ffc44d; --accent-ink:#2a1050;
     --ok:#4ee38a; --bad:#ff8080; --soft:#4a3370;
-    --t0:#ff9a47; --t1:#3fd9d2; --shadow:0 6px 0 rgba(0,0,0,.35);
+    --t0:#ff9a47; --t1:#3fd9d2; --shadow:0 .3rem 0 rgba(0,0,0,.35);
   }
 }
 :root[data-theme="dark"]{
@@ -28,157 +28,178 @@
   --card:#2c1b4d; --ink:#fff4fb; --muted:#c3a9e6; --line:#4d3380;
   --accent:#ff5cb8; --accent2:#ffc44d; --accent-ink:#2a1050;
   --ok:#4ee38a; --bad:#ff8080; --soft:#4a3370;
-  --t0:#ff9a47; --t1:#3fd9d2; --shadow:0 6px 0 rgba(0,0,0,.35);
+  --t0:#ff9a47; --t1:#3fd9d2; --shadow:0 .3rem 0 rgba(0,0,0,.35);
 }
+/* a tela inteira cabe sempre na janela (TV 16:9, celular deitado ou em pé): nada de rolar a página */
+html{font-size:clamp(11px,min(1.45vw,2.7vh),34px)}
 *{box-sizing:border-box}
-html{font-size:clamp(16px,min(1.3vw,2.2vh),30px)}
-body{margin:0;min-height:100vh;color:var(--ink);
-  background:linear-gradient(135deg,var(--bg1),var(--bg2) 50%,var(--bg3)) fixed;
-  font:1.06rem/1.5 "Trebuchet MS","Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
-main{max-width:640px;margin:0 auto;padding:20px 16px 48px}
-header{display:flex;justify-content:space-between;align-items:center;gap:12px}
-h1{font-size:1.9rem;margin:0;line-height:1.15;font-weight:900;
+html,body{height:100%;overflow:hidden}
+body{margin:0;color:var(--ink);
+  background:linear-gradient(135deg,var(--bg1),var(--bg2) 50%,var(--bg3));
+  font:1rem/1.35 "Trebuchet MS","Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+#app{height:100vh;height:100dvh;display:flex;flex-direction:column;gap:.6rem;padding:.6rem 1rem;max-width:1900px;margin:0 auto}
+[hidden]{display:none!important}
+
+.top{display:flex;align-items:center;gap:.6rem;flex:0 0 auto}
+.brand{font-size:1.5rem;font-weight:900;white-space:nowrap;
   background:linear-gradient(90deg,var(--accent),var(--accent2),var(--t1));
   -webkit-background-clip:text;background-clip:text;color:transparent}
-h1 span{display:inline-block;color:initial;-webkit-text-fill-color:initial;animation:bob 1.6s ease-in-out infinite}
-@keyframes bob{50%{transform:translateY(-5px) rotate(12deg)}}
-.score{color:var(--muted);font-size:.9rem;text-align:right;background:var(--card);border-radius:999px;padding:6px 14px;box-shadow:var(--shadow)}
-.score b{color:var(--accent);font-size:1.2rem}
-.card{background:var(--card);border:3px solid var(--line);border-radius:22px;padding:1.1rem;margin-top:1rem;box-shadow:var(--shadow)}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
-.chip{flex:1 0 40px;padding:8px 0;border-radius:999px;font-weight:800;text-align:center;
-  background:var(--card);border:3px solid var(--line);color:var(--muted)}
+.brand span{display:inline-block;-webkit-text-fill-color:initial;animation:bob 1.6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-.25rem) rotate(12deg)}}
+.team{flex:1 1 0;min-width:0;display:flex;align-items:center;gap:.6rem;background:var(--card);border:.2rem solid var(--line);border-radius:999px;padding:.2rem .9rem;box-shadow:var(--shadow)}
+.team .p{font-size:2rem;font-weight:900;line-height:1}
+.team .n{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.team .c{font-size:.8rem;color:var(--muted);white-space:nowrap}
+#team0 .n{color:var(--t0)} #team1 .n{color:var(--t1)}
+#team0.turn{border-color:var(--t0);background:var(--soft)} #team1.turn{border-color:var(--t1);background:var(--soft)}
+.round{text-align:center;color:var(--muted);font-size:.8rem;white-space:nowrap;line-height:1.1}
+.round b{display:block;color:var(--accent);font-size:1.4rem}
+.tools{display:flex;gap:.35rem;margin-left:auto}
+.tools button{padding:.35rem .7rem;white-space:nowrap}
+
+.banner{flex:0 0 auto;display:flex;align-items:center;gap:1rem;border-radius:1.2rem;padding:.5rem 1rem;color:#fff;background:var(--t0);box-shadow:var(--shadow)}
+.banner.t1{background:var(--t1)}
+.banner.crowd{background:linear-gradient(135deg,var(--accent),#7950f2);animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.015)}}
+#bannerText{flex:1 1 auto;font-size:1.7rem;font-weight:900;line-height:1.1}
+#bannerText small{display:block;font-size:.8rem;font-weight:700;opacity:.92}
+.steps{display:flex;gap:.3rem;font-size:.8rem;font-weight:800}
+.step{border-radius:999px;padding:.2rem .7rem;background:rgba(255,255,255,.2);white-space:nowrap}
+.step.now{background:#fff;color:#2b1b4a}
+.step.past{text-decoration:line-through;opacity:.7}
+
+.cols{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media (orientation:portrait){.cols{grid-template-columns:1fr;grid-template-rows:auto 1fr}}
+.card{background:var(--card);border:.2rem solid var(--line);border-radius:1.3rem;padding:.9rem 1.1rem;box-shadow:var(--shadow);min-height:0;display:flex;flex-direction:column;gap:.6rem;overflow:hidden}
+h2{font-size:.85rem;margin:0;color:var(--accent);font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.chips{display:flex;gap:.35rem}
+@media (orientation:portrait){.chips{flex-wrap:wrap}.chip{flex-basis:15%!important}}
+.chip{flex:1 1 0;padding:.6rem 0;border-radius:999px;font-weight:800;font-size:1.2rem;text-align:center;
+  background:var(--card);border:.2rem solid var(--line);color:var(--muted)}
 .chip.paid{background:var(--accent2);border-color:var(--accent2);color:#3a2300}
-.chip.sel{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);transform:scale(1.08)}
-.cost{margin:0 0 12px;font-weight:700;color:var(--muted)}
-button,input{font:inherit;border-radius:999px;border:3px solid var(--line);background:var(--card);color:var(--ink);padding:10px 18px}
-input{border-radius:16px}
+.chip.sel{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.cost{margin:0;font-weight:700;color:var(--muted)}
+.big{font-size:1.5rem;padding:.7rem}
+.grow{flex:1 1 auto}
+
+button,input{font:inherit;border-radius:999px;border:.2rem solid var(--line);background:var(--card);color:var(--ink);padding:.55rem 1rem}
+input{border-radius:1rem;width:100%;min-width:0;font-size:1.3rem}
+input:focus{outline:.2rem solid var(--accent2);outline-offset:1px}
 button{cursor:pointer;transition:transform .12s}
-button:hover:not(:disabled){border-color:var(--accent);transform:translateY(-2px) rotate(-1deg)}
+button:hover:not(:disabled){border-color:var(--accent);transform:translateY(-2px)}
 button:active:not(:disabled){transform:scale(.96)}
 button:disabled{opacity:.4;cursor:default}
 button.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;font-weight:800;text-shadow:0 1px 0 rgba(0,0,0,.2)}
-input{width:100%;min-width:0}
-input:focus{outline:3px solid var(--accent2);outline-offset:1px}
-.row{display:flex;flex-wrap:wrap;gap:8px}
+.row{display:flex;gap:.5rem}
 .row>*{flex:1 1 auto}
-h2{font-size:1rem;margin:0 0 8px;color:var(--accent);font-weight:800;text-transform:uppercase;letter-spacing:.06em}
-.hint{background:var(--soft);border-radius:16px;padding:12px 14px;font-size:1.15rem;font-weight:600}
-.msg{font-weight:800;font-size:1.2rem;margin:0 0 10px}
+.tries{list-style:none;margin:0;padding:0;color:var(--bad);font-weight:700;flex:1 1 auto;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-start}
+.tries li::before{content:"✘ "}
+.tries li.skip{color:var(--muted)} .tries li.skip::before{content:"⏭ "}
+
+/* painéis que entram e saem por cima (dica, resultado, início) */
+.pop{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(20,8,40,.55)}
+.pop .card{width:min(70rem,100%);max-height:100%;text-align:center;gap:1rem;padding:1.5rem 2rem}
+.hintText{font-size:2.6rem;font-weight:800;line-height:1.2}
+.msg{font-weight:900;font-size:2rem;margin:0}
 .msg.ok{color:var(--ok)} .msg.bad{color:var(--bad)}
-.teams{display:flex;gap:10px;margin-top:16px}
-.team{flex:1;background:var(--card);border:4px solid var(--line);border-radius:22px;padding:10px 12px;text-align:center;box-shadow:var(--shadow)}
-#team0{border-top-color:var(--t0)} #team1{border-top-color:var(--t1)}
-.team.turn{transform:scale(1.04);background:var(--soft)}
-#team0.turn{border-color:var(--t0)} #team1.turn{border-color:var(--t1)}
-.team .n{font-size:.95rem;font-weight:800}
-#team0 .n{color:var(--t0)} #team1 .n{color:var(--t1)}
-.team .p{font-size:2.1rem;font-weight:900;line-height:1.15}
-.team .c{font-size:.85rem;color:var(--muted)}
-label.f{display:block;margin:0 0 12px;color:var(--muted);font-size:.9rem;font-weight:700}
-label.f input{margin-top:4px;color:var(--ink)}
+.tap{color:var(--muted);font-size:.9rem;margin:0}
+#ytLink{color:var(--muted)}
+#setup{background:none}
+label.f{display:block;color:var(--muted);font-weight:700;text-align:left}
+label.f input{margin-top:.2rem;color:var(--ink)}
+
 #stage{position:fixed;inset:0;z-index:10;background:#000}
 #stage iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 #stage button{position:absolute;top:12px;right:12px;z-index:1;opacity:.7}
-button.ok{background:var(--ok);color:#fff;border-color:var(--ok);font-weight:700}
-button.no{background:var(--bad);color:#fff;border-color:var(--bad);font-weight:700}
-[hidden]{display:none!important}
-.banner{border-radius:22px;padding:.8rem 1rem;font-size:1.35rem;font-weight:900;text-align:center;margin-top:1rem;color:#fff;background:var(--t0);box-shadow:var(--shadow)}
-.banner.t1{background:var(--t1)}
-.banner.crowd{background:linear-gradient(135deg,var(--accent),#7950f2);animation:pulse 1.2s ease-in-out infinite}
-.banner small{display:block;font-size:.85rem;font-weight:700;opacity:.9}
-@keyframes pulse{50%{transform:scale(1.03)}}
-.steps{display:flex;gap:6px;margin-bottom:.8rem;font-size:.85rem;font-weight:800;flex-wrap:wrap}
-.step{flex:1 1 0;text-align:center;border-radius:999px;padding:4px 8px;background:var(--line);color:var(--muted)}
-.step.now{background:var(--accent);color:var(--accent-ink);transform:scale(1.06)}
-.step.past{text-decoration:line-through}
-.tries li.skip{color:var(--muted)} .tries li.skip::before{content:"⏭ "}
-.cols{display:block}
-@media (min-aspect-ratio:3/2) and (min-width:900px){
-  main{max-width:1800px;padding:1rem 2rem 1.5rem}
-  .cols{display:grid;grid-template-columns:1fr 1fr;gap:0 1.5rem;align-items:start}
-  .hint{font-size:1.5rem}
-  .chip{padding:.6rem 0;font-size:1.2rem}
-  .banner{font-size:1.9rem}
-  .team .p{font-size:3rem}
-  .team .n{font-size:1.2rem}
-  input{font-size:1.3rem}
-}
-.tries{list-style:none;margin:10px 0 0;padding:0;color:var(--bad);font-weight:700}
-.tries li::before{content:"✘ "}
 #confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:20}
-footer{color:var(--muted);font-size:.85rem;margin-top:24px;text-align:center}
-@media (prefers-reduced-motion: reduce){h1 span,.banner.crowd{animation:none} button{transition:none}}
+@media (prefers-reduced-motion: reduce){.brand span,.banner.crowd{animation:none} button{transition:none}}
+/* celular em pé: título e botões numa linha, times na outra */
+@media (orientation:portrait){
+  html{font-size:clamp(11px,min(3.6vw,1.9vh),30px)}
+  .top{display:grid;grid-template-columns:1fr auto 1fr;grid-template-areas:"brand brand tools" "t0 round t1"}
+  .brand{grid-area:brand;min-width:0;font-size:1.3rem;overflow:hidden;text-overflow:ellipsis}
+  .brand span{display:none}
+  .tools{grid-area:tools;margin-left:0}
+  #team0{grid-area:t0} #team1{grid-area:t1} .round{grid-area:round}
+  .banner{flex-wrap:wrap;gap:.4rem}
+  #bannerText{font-size:1.4rem}
+  .steps{flex:1 1 100%}
+  .step{flex:1 1 0;text-align:center}
+}
 </style>
 </head>
 <body>
-<main>
-  <header>
-    <h1><span>🎵</span> Qual é o Louvor? <span>🎉</span></h1>
-    <div class="score" id="roundBox" hidden>rodada <b id="round">1</b>/<span id="nrounds">10</span></div>
+<div id="app">
+  <header class="top">
+    <div class="brand"><span>🎵</span> Qual é o Louvor? <span>🎉</span></div>
+    <div class="team" id="team0" hidden></div>
+    <div class="round" id="roundBox" hidden>rodada<b id="round">1</b>de <span id="nrounds">10</span></div>
+    <div class="team" id="team1" hidden></div>
+    <div class="tools">
+      <button id="btnHint" hidden>💡 Dica</button>
+      <button id="btnTheme" title="Tema claro/escuro">🌓</button>
+      <button id="btnReset" title="Reiniciar jogo" hidden>↺</button>
+    </div>
   </header>
 
-  <section class="card" id="setup">
+  <div class="banner" id="banner" hidden><div id="bannerText"></div><div class="steps" id="steps"></div></div>
+
+  <div class="cols" id="game" hidden>
+    <section class="card">
+      <h2>Quantas notas?</h2>
+      <div class="chips" id="dots" role="group" aria-label="Número de notas"></div>
+      <p class="cost" id="cost"></p>
+      <div class="grow"></div>
+      <button class="primary big" id="btnPlay">▶ Tocar</button>
+    </section>
+
+    <section class="card" id="judge">
+      <h2 id="judgeTitle"></h2>
+      <form class="row" id="form" autocomplete="off">
+        <input id="answer" type="text" placeholder="Digite a resposta" aria-label="Resposta" style="flex:3 1 0">
+        <button class="primary" type="submit" style="flex:1 1 0">Responder</button>
+      </form>
+      <ul class="tries" id="tries"></ul>
+      <div class="row">
+        <button id="btnPass">⏭ Passar a vez</button>
+        <button id="btnCrowd">👏 Chamar a plateia</button>
+        <button id="btnGive">Encerrar sem ponto</button>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="pop" id="setup">
+  <section class="card" style="width:min(34rem,100%)">
     <h2>Novo jogo</h2>
     <label class="f">Nome do time 1<input id="name1" value="Time 1" maxlength="20"></label>
     <label class="f">Nome do time 2<input id="name2" value="Time 2" maxlength="20"></label>
     <label class="f">Créditos de notas por time (para a partida toda)<input id="credits" type="number" min="0" max="99" value="5" inputmode="numeric"></label>
-    <button class="primary" id="btnStart" style="width:100%">Começar</button>
+    <button class="primary big" id="btnStart">Começar</button>
   </section>
+</div>
 
-  <div id="game" hidden>
-    <div class="teams">
-      <div class="team" id="team0"></div>
-      <div class="team" id="team1"></div>
+<div class="pop" id="hintPop" hidden>
+  <section class="card">
+    <h2>💡 Dica</h2>
+    <div class="hintText" id="hint"></div>
+    <p class="tap">Toque em qualquer lugar para fechar. Ela volta pelo botão "💡 Dica" lá em cima.</p>
+  </section>
+</div>
+
+<div class="pop" id="result" hidden>
+  <section class="card">
+    <p class="msg" id="resMsg"></p>
+    <div class="row">
+      <button id="btnReplay">▶ Rever o trecho</button>
+      <button class="primary big" id="btnNext">Próxima música →</button>
     </div>
+    <a id="ytLink" target="_blank" rel="noopener">Abrir no YouTube</a>
+  </section>
+</div>
 
-    <div class="cols">
-      <div class="col">
-        <section class="card">
-          <h2>Dica</h2>
-          <div class="hint" id="hint"></div>
-        </section>
-
-        <section class="card">
-          <h2>Quantas notas?</h2>
-          <div class="chips" id="dots" role="group" aria-label="Número de notas"></div>
-          <p class="cost" id="cost"></p>
-          <button class="primary" id="btnPlay" style="width:100%">▶ Tocar</button>
-        </section>
-      </div>
-
-      <div class="col">
-        <div class="banner" id="banner"></div>
-
-        <section class="card" id="judge">
-          <div class="steps" id="steps"></div>
-          <h2 id="judgeTitle"></h2>
-          <form class="row" id="form" autocomplete="off">
-            <input id="answer" type="text" placeholder="Digite a resposta" aria-label="Resposta" style="flex:3 1 200px">
-            <button class="primary" type="submit" style="flex:1 1 90px">Responder</button>
-          </form>
-          <ul class="tries" id="tries"></ul>
-          <div class="row" style="margin-top:12px">
-            <button id="btnPass">⏭ Passar a vez</button>
-            <button id="btnCrowd">👏 Chamar a plateia agora</button>
-            <button id="btnGive">Encerrar sem ponto</button>
-          </div>
-        </section>
-
-        <section class="card" id="result" hidden>
-          <p class="msg" id="resMsg"></p>
-          <p><button id="btnReplay">▶ Rever o trecho</button> <a id="ytLink" target="_blank" rel="noopener">Abrir no YouTube</a></p>
-          <button class="primary" id="btnNext">Próxima música →</button>
-        </section>
-      </div>
-    </div>
-  </div>
-
-  <canvas id="confetti"></canvas>
-  <div id="stage" hidden><button id="btnCloseStage">✕ Fechar</button><div id="ytBox"></div></div>
-
-  <footer><button id="btnTheme" style="padding:4px 10px;font-size:.8rem">🌓 tema</button> <button id="btnReset" style="padding:4px 10px;font-size:.8rem" hidden>↺ reiniciar jogo</button></footer>
-</main>
+<canvas id="confetti"></canvas>
+<div id="stage" hidden><button id="btnCloseStage">✕ Fechar</button><div id="ytBox"></div></div>
 
 <script>
 // v/st: vídeo do YouTube e segundo inicial do trecho; n: número no hinário
@@ -248,12 +269,14 @@ function newGame(){
   credits = [c, c]; score = [0, 0];
   order = shuffle(SONGS.map((_,i)=>i)); idx = 0;
   playing = true;
-  showGame();
+  showGame(true);
   startRound();
 }
-function showGame(){
+function showGame(on){
   $("nrounds").textContent = SONGS.length;
-  $("setup").hidden = true; $("game").hidden = false; $("roundBox").hidden = false; $("btnReset").hidden = false;
+  $("setup").hidden = on;
+  ["game","banner","team0","team1","roundBox","btnHint","btnReset"].forEach(id => $(id).hidden = !on);
+  if (!on) { $("result").hidden = true; $("hintPop").hidden = true; }
 }
 
 // o estado do jogo fica no navegador: se a energia cair, tudo volta ao reabrir a página
@@ -272,7 +295,7 @@ function restore(){
     playing = true;
   } catch { return false; }
   song = SONGS[order[idx]];
-  showGame();
+  showGame(true);
   $("round").textContent = idx+1;
   $("hint").textContent = song.h;
   if (done) showResult(won);
@@ -283,22 +306,22 @@ function restore(){
 function startRound(){
   stop();
   song = SONGS[order[idx]];
-  notes = 1; sel = 1; done = false; tries = [];
+  notes = 1; sel = 1; done = false; won = null; tries = [];
   first = idx % 2;                          // alterna quem começa
   $("round").textContent = idx+1;
   $("hint").textContent = song.h;
   $("result").hidden = true; closeStage();
   $("answer").value = "";
   render();
-  $("answer").focus();
+  $("hintPop").hidden = false;              // a dica abre sozinha no começo da rodada
 }
 
 function render(){
   const k = tries.length, a = actor(k);
   [0,1].forEach(i => {
     const el = $("team"+i);
-    el.className = "team" + (!done && a.team === i ? " turn" : "");
-    el.innerHTML = `<div class="n">${esc(names[i])}</div><div class="p">${score[i]}</div><div class="c">${credits[i]} crédito${credits[i]===1?"":"s"}</div>`;
+    el.classList.toggle("turn", !done && a.team === i);
+    el.innerHTML = `<div class="p">${score[i]}</div><div style="min-width:0"><div class="n">${esc(names[i])}</div><div class="c">${credits[i]} crédito${credits[i]===1?"":"s"}</div></div>`;
   });
   // notes = notas já pagas; sel = escolhida (só vale pagar ao tocar ou responder)
   const canPick = !done && k === 0, left = credits[first];
@@ -310,20 +333,19 @@ function render(){
   const extra = sel - notes;
   $("cost").textContent = !canPick ? `${notes} ${notes===1?"nota liberada":"notas liberadas"}`
     : extra > 0 ? `${sel} notas: custa ${extra} crédito${extra===1?"":"s"} (restam ${left - extra} depois)`
-    : `${sel} ${sel===1?"nota":"notas"}: grátis. Você tem ${left} crédito${left===1?"":"s"} para notas extras.`;
+    : `${sel} ${sel===1?"nota":"notas"}: grátis. ${names[first]} tem ${left} crédito${left===1?"":"s"} para notas extras.`;
   $("btnPlay").textContent = `▶ Tocar ${sel} ${sel === 1 ? "nota" : "notas"}`;
-  $("banner").hidden = done;
   $("banner").className = "banner" + (a.crowd ? " crowd" : a.team === 1 ? " t1" : "");
-  $("banner").innerHTML = a.crowd
+  $("bannerText").innerHTML = done ? "Rodada encerrada" : a.crowd
     ? `👏 VEZ DA PLATEIA DE ${esc(names[a.team].toUpperCase())}!<small>A plateia fala em voz alta e o apresentador digita</small>`
     : `🎯 Vez de ${esc(names[a.team])}`;
-  $("judge").hidden = done;
   const stepNames = [names[first], names[1-first], "Plateia"];
   $("steps").innerHTML = stepNames.map((n,i)=>`<span class="step ${i === Math.min(k,2) ? "now" : i < k ? "past" : ""}">${i+1}. ${esc(n)}</span>`).join("");
   $("judgeTitle").textContent = a.crowd ? `Digite o que a plateia de ${names[a.team]} falou` : `Digite a resposta de: ${names[a.team]}`;
   $("btnPass").textContent = k >= 2 ? "⏭ Passar para a outra plateia" : "⏭ Passar a vez";
   $("btnCrowd").hidden = k >= 2;
-  $("tries").innerHTML = tries.map(t => `<li class="${t.skip ? "skip" : ""}">${esc(t.text)} <small>(${esc(t.by)})</small></li>`).join("");
+  // só as últimas tentativas: a lista não pode empurrar a tela
+  $("tries").innerHTML = tries.slice(-4).map(t => `<li class="${t.skip ? "skip" : ""}">${esc(t.text)} <small>(${esc(t.by)})</small></li>`).join("");
   save();
 }
 
@@ -331,9 +353,9 @@ function finish(winner){
   done = true; won = winner; stop();
   if (winner !== null) score[winner]++;
   celebrate = winner !== null;
+  $("hintPop").hidden = true;
   showResult(winner);
   render();
-  $("result").scrollIntoView({behavior:"smooth", block:"nearest"});
   openStage();   // ainda dentro do clique/Enter do apresentador: o navegador libera tela cheia e som
 }
 
@@ -385,6 +407,8 @@ $("btnCloseStage").onclick = closeStage;
 $("btnReplay").onclick = openStage;
 
 $("btnStart").onclick = newGame;
+$("btnHint").onclick = () => { $("hintPop").hidden = false; };
+$("hintPop").onclick = () => { $("hintPop").hidden = true; if (!done) $("answer").focus(); };
 
 $("form").onsubmit = e => {
   e.preventDefault();
@@ -432,15 +456,12 @@ $("dots").onclick = e => {
   sel = n; render();
 };
 $("btnNext").onclick = () => {
-  if (idx === SONGS.length-1) {
-    forget();
-    $("game").hidden = true; $("roundBox").hidden = true; $("setup").hidden = false; $("btnReset").hidden = true;
-  } else { idx++; startRound(); }
+  if (idx === SONGS.length-1) { forget(); stop(); showGame(false); }
+  else { idx++; startRound(); }
 };
 $("btnReset").onclick = () => {
   if (!confirm("Reiniciar o jogo? O placar e o progresso serão apagados.")) return;
-  forget(); stop(); closeStage();
-  $("game").hidden = true; $("roundBox").hidden = true; $("setup").hidden = false; $("btnReset").hidden = true;
+  forget(); stop(); closeStage(); showGame(false);
 };
 $("btnTheme").onclick = () => {
   const cur = document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
